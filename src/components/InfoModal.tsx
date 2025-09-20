@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useTranslation, type TranslationKeys } from '../hooks/useTranslation';
 import { useFocusTrap } from '../hooks/useFocusTrap';
 import Icon from './Icon';
+import { SafeHTML } from '../utils/sanitizeHtml';
 
 type ModalContentKey = 'terms' | 'disclaimer' | 'howTo';
 
@@ -64,8 +65,11 @@ const InfoModal: React.FC<InfoModalProps> = ({ contentKey, onClose }) => {
         </header>
 
         <div className="flex-1 p-6 overflow-y-auto prose prose-slate dark:prose-invert max-w-none">
-          {/* FIX: Cast dynamic key to TranslationKeys to satisfy the 't' function's type requirement. */}
-          <div dangerouslySetInnerHTML={{ __html: t(contentTextKey as TranslationKeys) }} />
+          {/* FIX: Using SafeHTML component to prevent XSS attacks */}
+          <SafeHTML
+            html={t(contentTextKey as TranslationKeys)}
+            className=""
+          />
         </div>
         
         <footer className="flex justify-end p-4 border-t border-slate-200 dark:border-slate-700">

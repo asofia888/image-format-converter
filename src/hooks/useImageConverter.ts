@@ -5,12 +5,10 @@ import type { TargetFormat, AppStatus, ProcessedFile, ResizeConfig, Preset } fro
 import { useTranslation, type TranslationKeys } from './useTranslation';
 import { getCroppedImg } from '../utils/cropImage';
 import { formatBytes } from '../utils/formatBytes';
+import { validateFiles, MAX_FILE_SIZE_MB } from '../utils/fileValidation';
 
 const SETTINGS_KEY = 'imageConverterSettings';
 const PRESETS_KEY = 'imageConverterPresets';
-const MAX_FILES = 100;
-const MAX_FILE_SIZE_MB = 50;
-const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 const defaultPresets: Preset[] = [
     {
@@ -191,7 +189,7 @@ export const useImageConverter = () => {
           convertedSize: null,
       };
 
-      if (file.size > MAX_FILE_SIZE_BYTES) {
+      if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
           return {
               ...baseInfo,
               status: 'error',
@@ -239,29 +237,29 @@ export const useImageConverter = () => {
     resetState();
     setError(null);
 
-    if (selectedFiles.length > MAX_FILES) {
-        const errorMsg = { key: 'errorTooManyFiles' as TranslationKeys, params: { maxFiles: MAX_FILES } };
-        setError(errorMsg);
-        setLiveRegionMessage(t(errorMsg.key, errorMsg.params));
-        setAppStatus('error');
-        return;
+    // Enhanced file validation
+    const validationResult = await validateFiles(selectedFiles);
+
+    if (validationResult.errors.length > 0) {
+      setError({
+        key: 'errorFileValidation' as TranslationKeys,
+        params: { errors: validationResult.errors.join(', ') }
+      });
+      setLiveRegionMessage(`Validation errors: ${validationResult.errors.join(', ')}`);
+      setAppStatus('error');
+      return;
     }
 
-    setAppStatus('loading');
-    
-    const validFiles = selectedFiles.filter(f => ['image/jpeg', 'image/png', 'image/webp'].includes(f.type));
-    
-    if (validFiles.length === 0 && selectedFiles.length > 0) {
-      // Handle case where some files were selected, but none were valid images (e.g. only oversized files)
-      const oversizedFiles = await Promise.all(selectedFiles.map(processSelectedFile));
-      setFiles(oversizedFiles);
+    if (validationResult.validFiles.length === 0) {
       setError({ key: 'errorNoValidFiles' });
       setLiveRegionMessage(t('errorNoValidFiles'));
       setAppStatus('error');
       return;
     }
-    
-    const processedFiles = await Promise.all(selectedFiles.map(processSelectedFile));
+
+    setAppStatus('loading');
+
+    const processedFiles = await Promise.all(validationResult.validFiles.map(processSelectedFile));
     setFiles(processedFiles);
     
     const firstValidFile = processedFiles.find(f => f.status !== 'error');

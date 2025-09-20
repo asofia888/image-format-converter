@@ -6,6 +6,7 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from './hooks/useTranslation';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import InfoModal from './components/InfoModal';
+import { SafeHTML } from './utils/sanitizeHtml';
 
 type ModalContentKey = 'terms' | 'disclaimer' | 'howTo';
 
@@ -37,7 +38,10 @@ const App: React.FC = () => {
         </main>
       </div>
       <footer className="w-full mt-8 text-center text-sm text-slate-500 dark:text-slate-500">
-        <p dangerouslySetInnerHTML={{ __html: t('footerText', { year: new Date().getFullYear() }) }} />
+        <SafeHTML
+          html={t('footerText', { year: new Date().getFullYear() })}
+          tag="p"
+        />
         <div className="mt-2 flex justify-center gap-4">
             <button onClick={() => handleOpenModal('terms')} className="hover:text-purple-500 dark:hover:text-purple-400 transition-colors">{t('footerTerms')}</button>
             <button onClick={() => handleOpenModal('disclaimer')} className="hover:text-purple-500 dark:hover:text-purple-400 transition-colors">{t('footerDisclaimer')}</button>
