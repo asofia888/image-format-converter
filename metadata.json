@@ -1,0 +1,5 @@
+{
+  "name": "Copy of Copy of Image Format Converter",
+  "description": "A web application to convert images between JPEG, PNG, and WebP formats. All processing is done locally in your browser for privacy and speed.",
+  "requestFramePermissions": []
+}
