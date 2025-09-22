@@ -1,5 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import Icon from './Icon';
+import EditableFileName from './EditableFileName';
 import { useTranslation } from '../hooks/useTranslation';
 import { formatBytes } from '../utils/formatBytes';
 
@@ -15,6 +16,8 @@ interface ImageComparatorProps {
     dimensions?: { width: number; height: number; } | null;
     isLoading?: boolean;
     error?: string | null;
+    customFileName?: string;
+    onFileNameChange?: (newName: string) => void;
 }
 
 const ImageComparator: React.FC<ImageComparatorProps> = ({
@@ -29,6 +32,8 @@ const ImageComparator: React.FC<ImageComparatorProps> = ({
     dimensions,
     isLoading,
     error,
+    customFileName,
+    onFileNameChange,
 }) => {
     const [sliderPosition, setSliderPosition] = useState(50);
     const [isDragging, setIsDragging] = useState(false);
@@ -136,7 +141,16 @@ const ImageComparator: React.FC<ImageComparatorProps> = ({
             {/* File Info */}
             <div className="w-full grid grid-cols-2 gap-4 text-sm text-slate-600 dark:text-slate-400 text-center px-4">
                 <div>
-                    <p className="truncate font-medium text-slate-800 dark:text-slate-200" title={beforeFileName}>{beforeFileName}</p>
+                    {beforeFileName && onFileNameChange ? (
+                        <EditableFileName
+                            originalName={beforeFileName}
+                            customName={customFileName}
+                            onNameChange={onFileNameChange}
+                            className="justify-center"
+                        />
+                    ) : (
+                        <p className="truncate font-medium text-slate-800 dark:text-slate-200" title={beforeFileName}>{beforeFileName}</p>
+                    )}
                      {beforeFileSize != null && (
                          <div className="text-xs space-x-2">
                              <span className="font-semibold">{formatBytes(beforeFileSize)}</span>

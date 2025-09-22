@@ -4,6 +4,7 @@ import FileUploader from './FileUploader';
 import ImageComparator from './ImageComparator';
 import ConversionControls from './ConversionControls';
 import ImageCropper from './ImageCropper';
+import EditableFileName from './EditableFileName';
 import Icon from './Icon';
 import { useTranslation } from '../hooks/useTranslation';
 import { useImageConverter } from '../hooks/useImageConverter';
@@ -41,6 +42,7 @@ const ImageConverter: React.FC = () => {
     handleSavePreset,
     handleApplyPreset,
     handleDeletePreset,
+    handleFileNameChange,
   } = useImageConverter();
 
   const renderStatusIcon = (status: FileStatus) => {
@@ -82,12 +84,14 @@ const ImageConverter: React.FC = () => {
                 beforeLabel={t('originalLabel')}
                 afterLabel={t('convertedLabel')}
                 beforeFileName={files[0].file.name}
-                afterFileName={files[0].convertedSrc ? getConvertedFileName(files[0].file) : undefined}
+                afterFileName={files[0].convertedSrc ? getConvertedFileName(files[0].file, files[0].customName) : undefined}
                 beforeFileSize={files[0].originalSize}
                 afterFileSize={files[0].convertedSize}
                 dimensions={{ width: files[0].originalWidth, height: files[0].originalHeight }}
                 isLoading={files[0].status === 'converting'}
                 error={files[0].error ? t(files[0].error.key, files[0].error.params) : null}
+                customFileName={files[0].customName}
+                onFileNameChange={(newName) => handleFileNameChange(files[0].id, newName)}
             />
           )}
 
@@ -128,7 +132,12 @@ const ImageConverter: React.FC = () => {
                                 </div>
                               )}
                               <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate" title={file.file.name}>{file.file.name}</p>
+                                  <EditableFileName
+                                    originalName={file.file.name}
+                                    customName={file.customName}
+                                    onNameChange={(newName) => handleFileNameChange(file.id, newName)}
+                                    className="mb-1"
+                                  />
                                   <div className="flex items-center gap-1.5 text-xs">
                                     <span className="text-slate-500 dark:text-slate-400">{formatBytes(file.originalSize)}{file.originalWidth > 0 && ` (${file.originalWidth}x${file.originalHeight})`}</span>
                                     {file.status === 'success' && file.convertedSize != null && (
@@ -171,7 +180,7 @@ const ImageConverter: React.FC = () => {
                 isBatchMode={isBatchMode}
                 onDownloadZip={handleDownloadZip}
                 convertedImageSrc={!isBatchMode && files[0] ? files[0].convertedSrc : null}
-                convertedFileName={!isBatchMode && files[0] ? getConvertedFileName(files[0].file) : ''}
+                convertedFileName={!isBatchMode && files[0] ? getConvertedFileName(files[0].file, files[0].customName) : ''}
                 resizeConfig={resizeConfig}
                 setResizeConfig={setResizeConfig}
                 originalDimensions={!isBatchMode && files[0] ? { width: files[0].originalWidth, height: files[0].originalHeight } : null}

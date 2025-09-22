@@ -13,27 +13,49 @@ interface FileUploaderProps {
 // and to fix useCallback dependency issues.
 const readDirectoryEntries = async (directoryReader: any): Promise<any[]> => {
   return new Promise((resolve, reject) => {
-      directoryReader.readEntries((entries: any[]) => {
-          resolve(entries);
-      }, reject);
+      try {
+        directoryReader.readEntries((entries: any[]) => {
+            resolve(entries);
+        }, (error: any) => {
+            console.error('Error reading directory entries:', error);
+            reject(error);
+        });
+      } catch (error) {
+        console.error('Error in readDirectoryEntries:', error);
+        reject(error);
+      }
   });
 }
 
 const getFilesInDirectory = async (directoryEntry: any): Promise<File[]> => {
   let files: File[] = [];
-  const reader = directoryEntry.createReader();
-  let entries: any[];
-  do {
-    entries = await readDirectoryEntries(reader);
-    for (const entry of entries) {
-      if (entry.isDirectory) {
-        files = files.concat(await getFilesInDirectory(entry));
-      } else if (entry.isFile) {
-         const file = await new Promise<File>((resolve, reject) => entry.file(resolve, reject));
-         files.push(file);
+  try {
+    const reader = directoryEntry.createReader();
+    let entries: any[];
+    do {
+      entries = await readDirectoryEntries(reader);
+      for (const entry of entries) {
+        if (entry.isDirectory) {
+          files = files.concat(await getFilesInDirectory(entry));
+        } else if (entry.isFile) {
+           try {
+             const file = await new Promise<File>((resolve, reject) => {
+               entry.file(resolve, (error: any) => {
+                 console.error('Error getting file from entry:', error);
+                 reject(error);
+               });
+             });
+             files.push(file);
+           } catch (error) {
+             console.error('Error processing file entry:', entry.name, error);
+           }
+        }
       }
-    }
-  } while (entries.length > 0);
+    } while (entries.length > 0);
+  } catch (error) {
+    console.error('Error reading directory:', directoryEntry.name, error);
+    throw error;
+  }
   return files;
 };
 
@@ -66,37 +88,71 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelect, status, erro
     setIsDragging(false);
 
     let droppedFiles: File[] = [];
-    if (e.dataTransfer.items) {
-      const items = [...e.dataTransfer.items];
-      const filePromises = items.map(item => {
-        // Use webkitGetAsEntry to handle directories
-        const entry = item.webkitGetAsEntry();
-        if (entry) {
-          if (entry.isDirectory) {
-            return getFilesInDirectory(entry);
-          }
-          if (entry.isFile) {
-            return new Promise<File[]>((resolve, reject) => {
-              // FIX: Property 'file' does not exist on type 'FileSystemEntry'. Cast to FileSystemFileEntry.
-              (entry as FileSystemFileEntry).file((file: File) => resolve([file]), reject);
-            });
-          }
-        }
-        return Promise.resolve([]);
-      });
-      
-      const fileArrays = await Promise.all(filePromises);
-      droppedFiles = fileArrays.flat();
 
-    } else {
+    try {
+      if (e.dataTransfer.items) {
+        const items = [...e.dataTransfer.items];
+        console.log(`Processing ${items.length} dropped items`);
+
+        const filePromises = items.map(async (item) => {
+          try {
+            // Use webkitGetAsEntry to handle directories
+            const entry = item.webkitGetAsEntry();
+            if (entry) {
+              console.log(`Processing entry: ${entry.name}, isDirectory: ${entry.isDirectory}, isFile: ${entry.isFile}`);
+
+              if (entry.isDirectory) {
+                return await getFilesInDirectory(entry);
+              }
+              if (entry.isFile) {
+                return new Promise<File[]>((resolve, reject) => {
+                  // FIX: Property 'file' does not exist on type 'FileSystemEntry'. Cast to FileSystemFileEntry.
+                  (entry as FileSystemFileEntry).file(
+                    (file: File) => {
+                      console.log(`Successfully processed file: ${file.name}`);
+                      resolve([file]);
+                    },
+                    (error: any) => {
+                      console.error('Error processing file entry:', error);
+                      reject(error);
+                    }
+                  );
+                });
+              }
+            } else {
+              console.warn('No entry found for item');
+            }
+            return [];
+          } catch (error) {
+            console.error('Error processing dropped item:', error);
+            return [];
+          }
+        });
+
+        const fileArrays = await Promise.allSettled(filePromises);
+        droppedFiles = fileArrays
+          .filter((result): result is PromiseFulfilledResult<File[]> => result.status === 'fulfilled')
+          .map(result => result.value)
+          .flat();
+
+      } else {
+        console.log('Using fallback file handling');
         droppedFiles = [...e.dataTransfer.files];
+      }
+
+      console.log(`Total files processed: ${droppedFiles.length}`);
+
+      if (droppedFiles.length > 0) {
+          onFilesSelect(droppedFiles);
+      } else {
+          console.warn('No valid files found in drop');
+      }
+
+    } catch (error) {
+      console.error('Error handling drop:', error);
+    } finally {
+      e.dataTransfer.clearData();
     }
-    
-    if (droppedFiles.length > 0) {
-        onFilesSelect(droppedFiles);
-    }
-    
-    e.dataTransfer.clearData();
   }, [onFilesSelect]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

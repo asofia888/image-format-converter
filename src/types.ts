@@ -38,6 +38,7 @@ export interface ProcessedFile {
   convertedSrc: string | null;
   convertedBlob: Blob | null;
   convertedSize: number | null;
+  customName?: string; // User-editable file name (without extension)
   // FIX: Use TranslationKeys for the error key to ensure it's a valid translation key.
   error: { key: TranslationKeys; params?: Record<string, string | number> } | null;
 }

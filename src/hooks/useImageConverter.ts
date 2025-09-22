@@ -367,17 +367,17 @@ export const useImageConverter = () => {
 
   }, [files, convertFile, updateFileStatus, t]);
   
-  const getConvertedFileName = useCallback((originalFile: File): string => {
+  const getConvertedFileName = useCallback((originalFile: File, customName?: string): string => {
     if (!originalFile) return 'download';
-    const name = originalFile.name.substring(0, originalFile.name.lastIndexOf('.'));
-    return `${name}.${targetFormat}`;
+    const baseName = customName || originalFile.name.substring(0, originalFile.name.lastIndexOf('.'));
+    return `${baseName}.${targetFormat}`;
   }, [targetFormat]);
 
   const handleDownloadZip = useCallback(async () => {
     const zip = new JSZip();
     files.forEach(file => {
         if (file.status === 'success' && file.convertedBlob) {
-            zip.file(getConvertedFileName(file.file), file.convertedBlob);
+            zip.file(getConvertedFileName(file.file, file.customName), file.convertedBlob);
         }
     });
 
@@ -526,7 +526,7 @@ export const useImageConverter = () => {
   const handleDeletePreset = useCallback((id: string) => {
       const presetToDelete = presets.find(p => p.id === id);
       if (!presetToDelete) return;
-      
+
       const updatedPresets = presets.filter(p => p.id !== id);
       setPresets(updatedPresets);
       if (activePresetId === id) {
@@ -539,6 +539,16 @@ export const useImageConverter = () => {
         console.error("Failed to save presets to localStorage", e);
       }
   }, [presets, activePresetId, t]);
+
+  const handleFileNameChange = useCallback((fileId: string, newName: string) => {
+    setFiles(prevFiles =>
+      prevFiles.map(file =>
+        file.id === fileId
+          ? { ...file, customName: newName }
+          : file
+      )
+    );
+  }, []);
 
   const isDownloadReady = useMemo(() => files.length > 0 && files.every(f => f.status === 'success' || f.status === 'error'), [files]);
   const isConverting = useMemo(() => appStatus === 'converting', [appStatus]);
@@ -573,5 +583,6 @@ export const useImageConverter = () => {
     handleSavePreset,
     handleApplyPreset,
     handleDeletePreset,
+    handleFileNameChange,
   };
 };
