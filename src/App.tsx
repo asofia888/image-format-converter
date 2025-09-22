@@ -18,12 +18,12 @@ const App: React.FC = () => {
   const handleCloseModal = () => setModalContent(null);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 flex flex-col items-center justify-between p-4 font-sans relative transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 flex flex-col items-center p-4 font-sans relative transition-colors duration-300">
       <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
         <ThemeSwitcher />
         <LanguageSwitcher />
       </div>
-      <div className="w-full flex flex-col items-center">
+      <div className="w-full flex flex-col items-center flex-grow">
         <header className="text-center my-8 flex flex-col items-center gap-4">
             <img src="/logo.png" alt={t('appTitle')} className="w-16 h-16" />
             <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500">
