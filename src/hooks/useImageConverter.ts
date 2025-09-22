@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import JSZip from 'jszip';
 import type { Area } from 'react-easy-crop';
-import type { TargetFormat, AppStatus, ProcessedFile } from '../types';
+import type { ProcessedFile } from '../types';
 import { useTranslation, type TranslationKeys } from './useTranslation';
 import { getCroppedImg } from '../utils/cropImage';
 import { useFileManager } from './useFileManager';
@@ -138,7 +138,7 @@ export const useImageConverter = () => {
 
     const conversionPromises = filesToProcess.map(async file => {
         const result = await convertFile(file);
-        updateFileStatus(file.id, result.status!, result.error);
+        updateFileStatus(file.id, result.status!, result.error ?? undefined);
         if (result.status === 'success' && result.convertedSrc && result.convertedBlob && result.convertedSize) {
           updateFileConversion(file.id, result.convertedSrc, result.convertedBlob, result.convertedSize);
         }
@@ -263,7 +263,8 @@ export const useImageConverter = () => {
           return false;
       }
 
-      return savePreset(name);
+      savePreset(name);
+      return true;
   }, [presets, savePreset, setError]);
 
   const isDownloadReady = useMemo(() => files.length > 0 && files.every(f => f.status === 'success' || f.status === 'error'), [files]);

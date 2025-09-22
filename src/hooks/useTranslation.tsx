@@ -77,7 +77,8 @@ const en = {
   "presetSaveSuccess": "Preset '{presetName}' saved.",
   "presetDeleteSuccess": "Preset '{presetName}' deleted.",
   "errorPresetNameExists": "A preset with this name already exists.",
-  "errorPresetNameEmpty": "Preset name cannot be empty."
+  "errorPresetNameEmpty": "Preset name cannot be empty.",
+  "presetDuplicateError": "A preset with the same settings already exists."
 };
 
 const ja = {
@@ -155,7 +156,8 @@ const ja = {
   "presetSaveSuccess": "プリセット「{presetName}」を保存しました。",
   "presetDeleteSuccess": "プリセット「{presetName}」を削除しました。",
   "errorPresetNameExists": "この名前のプリセットは既に存在します。",
-  "errorPresetNameEmpty": "プリセット名は空にできません。"
+  "errorPresetNameEmpty": "プリセット名は空にできません。",
+  "presetDuplicateError": "同じ設定のプリセットが既に存在します。"
 };
 
 const translations = { en, ja };

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { ProcessedFile, AppStatus } from '../types';
-import { useTranslation, type TranslationKeys } from './useTranslation';
+import { type TranslationKeys } from './useTranslation';
 import { validateFiles, MAX_FILE_SIZE_MB } from '../utils/fileValidation';
 import { formatBytes } from '../utils/formatBytes';
 
@@ -8,7 +8,6 @@ export const useFileManager = () => {
   const [files, setFiles] = useState<ProcessedFile[]>([]);
   const [appStatus, setAppStatus] = useState<AppStatus>('idle');
   const [error, setError] = useState<{ key: TranslationKeys; params?: Record<string, string | number> } | null>(null);
-  const { t } = useTranslation();
 
   // Effect to clean up object URLs to prevent memory leaks
   useEffect(() => {
@@ -88,16 +87,25 @@ export const useFileManager = () => {
     setAppStatus('loading');
 
     try {
-      const validationResult = validateFiles(selectedFiles);
+      const validationResult = await validateFiles(selectedFiles);
 
-      if (!validationResult.isValid) {
-        setError(validationResult.error!);
+      if (validationResult.errors.length > 0) {
+        setError({
+          key: 'errorFileValidation' as TranslationKeys,
+          params: { errors: validationResult.errors.join(', ') }
+        });
+        setAppStatus('error');
+        return;
+      }
+
+      if (validationResult.validFiles.length === 0) {
+        setError({ key: 'errorNoValidFiles' });
         setAppStatus('error');
         return;
       }
 
       const processedFiles = await Promise.all(
-        validationResult.validFiles!.map(processSelectedFile)
+        validationResult.validFiles.map(processSelectedFile)
       );
 
       setFiles(processedFiles);

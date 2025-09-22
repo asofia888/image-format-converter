@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Preset, TargetFormat, ResizeConfig, ProcessedFile } from '../types';
 import { useTranslation } from './useTranslation';
 
