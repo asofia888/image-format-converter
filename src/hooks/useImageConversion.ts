@@ -1,0 +1,153 @@
+import { useState, useCallback } from 'react';
+import JSZip from 'jszip';
+import type { TargetFormat, AppStatus, ProcessedFile, ResizeConfig } from '../types';
+import type { TranslationKeys } from './useTranslation';
+
+interface UseImageConversionProps {
+  files: ProcessedFile[];
+  targetFormat: TargetFormat;
+  quality: number;
+  resizeConfig: ResizeConfig;
+  setAppStatus: (status: AppStatus) => void;
+  setError: (error: { key: TranslationKeys; params?: Record<string, string | number> } | null) => void;
+  updateFileStatus: (fileId: string, status: ProcessedFile['status'], error?: { key: TranslationKeys; params?: Record<string, string | number> }) => void;
+  updateFileConversion: (fileId: string, convertedSrc: string, convertedBlob: Blob, convertedSize: number) => void;
+  setLiveRegionMessage: (message: string) => void;
+  t: (key: TranslationKeys, params?: Record<string, string | number>) => string;
+}
+
+export const useImageConversion = ({
+  files,
+  targetFormat,
+  quality,
+  resizeConfig,
+  setAppStatus,
+  setError,
+  updateFileStatus,
+  updateFileConversion,
+  setLiveRegionMessage,
+  t
+}: UseImageConversionProps) => {
+  const [convertedCount, setConvertedCount] = useState(0);
+
+  const convertFile = useCallback(async (fileToProcess: ProcessedFile): Promise<Partial<ProcessedFile>> => {
+    return new Promise(async (resolve) => {
+      const { id, file } = fileToProcess;
+      updateFileStatus(id, 'converting');
+
+      if (typeof Worker === 'undefined' || typeof OffscreenCanvas === 'undefined' || !window.createImageBitmap) {
+        resolve({ status: 'error', error: { key: 'errorBrowserSupport' } });
+        return;
+      }
+
+      const worker = new Worker(new URL('../workers/converter.worker.ts', import.meta.url), {
+        type: 'module',
+      });
+
+      worker.onmessage = (e: MessageEvent) => {
+        const { success, blob, error } = e.data;
+        if (success && blob) {
+          const dataUrl = URL.createObjectURL(blob);
+          resolve({ status: 'success', convertedSrc: dataUrl, convertedBlob: blob, convertedSize: blob.size });
+        } else {
+          console.error('Worker processing error:', error);
+          if (error && typeof error === 'object' && 'key' in error) {
+            resolve({ status: 'error', error: error as { key: TranslationKeys, params?: any } });
+          } else {
+            resolve({ status: 'error', error: { key: 'errorWorkerGeneric', params: { message: String(error) } } });
+          }
+        }
+        worker.terminate();
+      };
+
+      worker.onerror = (e: ErrorEvent) => {
+        console.error('Worker error:', e.message);
+        resolve({ status: 'error', error: { key: 'errorWorkerGeneric', params: { message: e.message } } });
+        worker.terminate();
+      };
+
+      try {
+        const imageBitmap = await createImageBitmap(file);
+        worker.postMessage(
+          {
+            imageData: imageBitmap,
+            targetFormat: targetFormat,
+            quality: quality,
+            fileType: file.type,
+            resizeConfig: resizeConfig,
+            originalWidth: fileToProcess.originalWidth,
+            originalHeight: fileToProcess.originalHeight,
+          },
+          [imageBitmap]
+        );
+      } catch (e) {
+        console.error('Error creating ImageBitmap:', e);
+        resolve({ status: 'error', error: { key: 'errorLoadImage' } });
+        worker.terminate();
+      }
+    });
+  }, [targetFormat, quality, updateFileStatus, resizeConfig]);
+
+  const handleConvert = useCallback(async () => {
+    const filesToProcess = files.filter(f => f.status === 'pending');
+    if (filesToProcess.length === 0) return;
+
+    setAppStatus('converting');
+    setError(null);
+    const alreadyConvertedCount = files.length - filesToProcess.length;
+    setConvertedCount(alreadyConvertedCount);
+
+    setLiveRegionMessage(t('liveRegionConversionStarted', { count: filesToProcess.length }));
+
+    const conversionPromises = filesToProcess.map(async file => {
+        const result = await convertFile(file);
+        updateFileStatus(file.id, result.status!, result.error ?? undefined);
+        if (result.status === 'success' && result.convertedSrc && result.convertedBlob && result.convertedSize) {
+          updateFileConversion(file.id, result.convertedSrc, result.convertedBlob, result.convertedSize);
+        }
+        setConvertedCount(prev => prev + 1);
+    });
+
+    await Promise.all(conversionPromises);
+    setAppStatus('success');
+    setLiveRegionMessage(t('liveRegionConversionComplete', { count: files.length }));
+
+  }, [files, convertFile, updateFileStatus, updateFileConversion, setAppStatus, setError, t]);
+
+  const getConvertedFileName = useCallback((originalFile: File, customName?: string): string => {
+    if (!originalFile) return 'download';
+    const baseName = customName || originalFile.name.substring(0, originalFile.name.lastIndexOf('.'));
+    return `${baseName}.${targetFormat}`;
+  }, [targetFormat]);
+
+  const handleDownloadZip = useCallback(async () => {
+    const zip = new JSZip();
+    files.forEach(file => {
+        if (file.status === 'success' && file.convertedBlob) {
+            zip.file(getConvertedFileName(file.file, file.customName), file.convertedBlob);
+        }
+    });
+
+    try {
+        const content = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = `converted_images_${Date.now()}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    } catch (e) {
+        setError({ key: 'errorCreateZip' });
+        setLiveRegionMessage(t('errorCreateZip'));
+        console.error(e);
+    }
+  }, [files, getConvertedFileName, setError, t]);
+
+  return {
+    convertedCount,
+    handleConvert,
+    getConvertedFileName,
+    handleDownloadZip
+  };
+};

@@ -3,11 +3,12 @@ import type { ProcessedFile, AppStatus } from '../types';
 import { type TranslationKeys } from './useTranslation';
 import { validateFiles, MAX_FILE_SIZE_MB } from '../utils/fileValidation';
 import { formatBytes } from '../utils/formatBytes';
+import { useErrorHandler } from './useErrorHandler';
 
 export const useFileManager = () => {
   const [files, setFiles] = useState<ProcessedFile[]>([]);
   const [appStatus, setAppStatus] = useState<AppStatus>('idle');
-  const [error, setError] = useState<{ key: TranslationKeys; params?: Record<string, string | number> } | null>(null);
+  const { error, setError, handleError, clearError } = useErrorHandler();
 
   // Effect to clean up object URLs to prevent memory leaks
   useEffect(() => {
@@ -83,23 +84,22 @@ export const useFileManager = () => {
   };
 
   const handleFilesSelect = useCallback(async (selectedFiles: File[]) => {
-    setError(null);
+    clearError();
     setAppStatus('loading');
 
     try {
       const validationResult = await validateFiles(selectedFiles);
 
       if (validationResult.errors.length > 0) {
-        setError({
-          key: 'errorFileValidation' as TranslationKeys,
-          params: { errors: validationResult.errors.join(', ') }
+        handleError('errorFileValidation' as TranslationKeys, {
+          errors: validationResult.errors.join(', ')
         });
         setAppStatus('error');
         return;
       }
 
       if (validationResult.validFiles.length === 0) {
-        setError({ key: 'errorNoValidFiles' });
+        handleError('errorNoValidFiles');
         setAppStatus('error');
         return;
       }
@@ -112,10 +112,10 @@ export const useFileManager = () => {
       setAppStatus('idle');
     } catch (error) {
       console.error('Error processing files:', error);
-      setError({ key: 'errorLoadImage' });
+      handleError('errorLoadImage');
       setAppStatus('error');
     }
-  }, []);
+  }, [clearError, handleError]);
 
   const updateFileStatus = useCallback((fileId: string, status: ProcessedFile['status'], error?: { key: TranslationKeys; params?: Record<string, string | number> }) => {
     setFiles(prevFiles =>
@@ -171,8 +171,8 @@ export const useFileManager = () => {
   const resetState = useCallback(() => {
     setFiles([]);
     setAppStatus('idle');
-    setError(null);
-  }, []);
+    clearError();
+  }, [clearError]);
 
   return {
     files,

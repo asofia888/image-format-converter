@@ -1,6 +1,6 @@
 
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import ImageConverter from './components/ImageConverter';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from './hooks/useTranslation';
@@ -14,8 +14,13 @@ const App: React.FC = () => {
   const { t } = useTranslation();
   const [modalContent, setModalContent] = useState<ModalContentKey | null>(null);
 
-  const handleOpenModal = (contentKey: ModalContentKey) => setModalContent(contentKey);
-  const handleCloseModal = () => setModalContent(null);
+  const handleOpenModal = useCallback((contentKey: ModalContentKey) => {
+    setModalContent(contentKey);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setModalContent(null);
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 flex flex-col items-center p-4 font-sans relative transition-colors duration-300">
