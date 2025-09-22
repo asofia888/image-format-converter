@@ -20,6 +20,7 @@
   "convertAllButton": "Convert All",
   "downloadButton": "Download",
   "downloadAllButton": "Download All (.zip)",
+  "removeFile": "Remove file",
   "errorNoValidFiles": "No valid image files (JPEG, PNG, WebP) were found.",
   "errorFileTooLarge": "File '{fileName}' is too large ({fileSize}). Max size is {maxSize}MB.",
   "errorTooManyFiles": "Cannot process more than {maxFiles} files at once.",

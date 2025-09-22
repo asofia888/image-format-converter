@@ -550,6 +550,23 @@ export const useImageConverter = () => {
     );
   }, []);
 
+  const handleRemoveFile = useCallback((fileId: string) => {
+    setFiles(prevFiles => {
+      const updatedFiles = prevFiles.filter(file => file.id !== fileId);
+
+      // If no files remain, reset the app state
+      if (updatedFiles.length === 0) {
+        setAppStatus('idle');
+        setError(null);
+        setConvertedCount(0);
+        setLiveRegionMessage('');
+        setIsCropperOpen(false);
+      }
+
+      return updatedFiles;
+    });
+  }, []);
+
   const isDownloadReady = useMemo(() => files.length > 0 && files.every(f => f.status === 'success' || f.status === 'error'), [files]);
   const isConverting = useMemo(() => appStatus === 'converting', [appStatus]);
 
@@ -584,5 +601,6 @@ export const useImageConverter = () => {
     handleApplyPreset,
     handleDeletePreset,
     handleFileNameChange,
+    handleRemoveFile,
   };
 };

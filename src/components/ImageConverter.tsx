@@ -43,6 +43,7 @@ const ImageConverter: React.FC = () => {
     handleApplyPreset,
     handleDeletePreset,
     handleFileNameChange,
+    handleRemoveFile,
   } = useImageConverter();
 
   const renderStatusIcon = (status: FileStatus) => {
@@ -92,6 +93,7 @@ const ImageConverter: React.FC = () => {
                 error={files[0].error ? t(files[0].error.key, files[0].error.params) : null}
                 customFileName={files[0].customName}
                 onFileNameChange={(newName) => handleFileNameChange(files[0].id, newName)}
+                onRemoveFile={() => handleRemoveFile(files[0].id)}
             />
           )}
 
@@ -156,8 +158,15 @@ const ImageConverter: React.FC = () => {
                                     <p className="text-xs text-red-500 dark:text-red-400 truncate" title={t(file.error.key, file.error.params)}>{t(file.error.key, file.error.params)}</p>
                                   )}
                               </div>
-                              <div className="flex-shrink-0">
+                              <div className="flex-shrink-0 flex items-center gap-2">
                                   {renderStatusIcon(file.status)}
+                                  <button
+                                    onClick={() => handleRemoveFile(file.id)}
+                                    className="p-1 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+                                    title={t('removeFile')}
+                                  >
+                                    <Icon name="trash" className="w-4 h-4" />
+                                  </button>
                               </div>
                           </li>
                       ))}

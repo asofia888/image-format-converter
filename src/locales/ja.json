@@ -20,6 +20,7 @@
   "convertAllButton": "すべて変換",
   "downloadButton": "ダウンロード",
   "downloadAllButton": "すべてダウンロード (.zip)",
+  "removeFile": "ファイルを削除",
   "errorNoValidFiles": "有効な画像ファイル（JPEG, PNG, WebP）が見つかりませんでした。",
   "errorFileTooLarge": "ファイル「{fileName}」は大きすぎます ({fileSize})。最大サイズは{maxSize}MBです。",
   "errorTooManyFiles": "{maxFiles}個を超えるファイルは一度に処理できません。",

@@ -18,6 +18,7 @@ interface ImageComparatorProps {
     error?: string | null;
     customFileName?: string;
     onFileNameChange?: (newName: string) => void;
+    onRemoveFile?: () => void;
 }
 
 const ImageComparator: React.FC<ImageComparatorProps> = ({
@@ -34,6 +35,7 @@ const ImageComparator: React.FC<ImageComparatorProps> = ({
     error,
     customFileName,
     onFileNameChange,
+    onRemoveFile,
 }) => {
     const [sliderPosition, setSliderPosition] = useState(50);
     const [isDragging, setIsDragging] = useState(false);
@@ -141,16 +143,27 @@ const ImageComparator: React.FC<ImageComparatorProps> = ({
             {/* File Info */}
             <div className="w-full grid grid-cols-2 gap-4 text-sm text-slate-600 dark:text-slate-400 text-center px-4">
                 <div>
-                    {beforeFileName && onFileNameChange ? (
-                        <EditableFileName
-                            originalName={beforeFileName}
-                            customName={customFileName}
-                            onNameChange={onFileNameChange}
-                            className="justify-center"
-                        />
-                    ) : (
-                        <p className="truncate font-medium text-slate-800 dark:text-slate-200" title={beforeFileName}>{beforeFileName}</p>
-                    )}
+                    <div className="flex items-center justify-center gap-2 mb-2">
+                        {beforeFileName && onFileNameChange ? (
+                            <EditableFileName
+                                originalName={beforeFileName}
+                                customName={customFileName}
+                                onNameChange={onFileNameChange}
+                                className="justify-center"
+                            />
+                        ) : (
+                            <p className="truncate font-medium text-slate-800 dark:text-slate-200" title={beforeFileName}>{beforeFileName}</p>
+                        )}
+                        {onRemoveFile && (
+                            <button
+                                onClick={onRemoveFile}
+                                className="p-1 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 rounded transition-colors"
+                                title={t('removeFile')}
+                            >
+                                <Icon name="trash" className="w-4 h-4" />
+                            </button>
+                        )}
+                    </div>
                      {beforeFileSize != null && (
                          <div className="text-xs space-x-2">
                              <span className="font-semibold">{formatBytes(beforeFileSize)}</span>
