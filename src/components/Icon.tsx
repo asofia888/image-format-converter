@@ -3,9 +3,10 @@ import React from 'react';
 interface IconProps {
   name: string;
   className?: string;
+  title?: string;
 }
 
-const Icon: React.FC<IconProps> = ({ name, className }) => {
+const Icon: React.FC<IconProps> = ({ name, className, title }) => {
   const icons: { [key: string]: React.ReactNode } = {
     upload: (
       <svg className={className} aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
@@ -145,6 +146,10 @@ const Icon: React.FC<IconProps> = ({ name, className }) => {
   const IconComponent = icons[name];
 
   if (!IconComponent) return null;
+
+  if (title) {
+    return <span title={title}>{IconComponent}</span>;
+  }
 
   return IconComponent;
 };
