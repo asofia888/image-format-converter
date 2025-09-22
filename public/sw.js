@@ -1,4 +1,4 @@
-const CACHE_NAME = 'image-converter-cache-v1';
+const CACHE_NAME = 'image-converter-cache-v2';
 const APP_SHELL_URLS = [
     '/',
     '/index.html',
@@ -14,6 +14,13 @@ self.addEventListener('install', (event) => {
             })
             .then(() => self.skipWaiting())
     );
+});
+
+// Listen for skipWaiting message
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.action === 'skipWaiting') {
+        self.skipWaiting();
+    }
 });
 
 // Activate: Cleans up old caches
@@ -33,12 +40,12 @@ self.addEventListener('activate', (event) => {
 
 // Fetch: Serves assets from cache or network
 self.addEventListener('fetch', (event) => {
-    // For navigation requests, use a network-first strategy
+    // For navigation requests, always use network first and force cache update
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request)
+            fetch(event.request, { cache: 'reload' })
                 .then(response => {
-                    // If the fetch is successful, clone it and cache it.
+                    // If the fetch is successful, clone it and update cache
                     if (response.ok) {
                         const responseClone = response.clone();
                         caches.open(CACHE_NAME).then(cache => {
@@ -48,7 +55,7 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 })
                 .catch(() => {
-                    // If the network fails, serve the main page from the cache.
+                    // If the network fails, serve the main page from the cache
                     return caches.match('/');
                 })
         );
