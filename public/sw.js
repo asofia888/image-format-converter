@@ -1,4 +1,4 @@
-const CACHE_NAME = 'image-converter-cache-v2';
+const CACHE_NAME = 'image-converter-cache-v3';
 const APP_SHELL_URLS = [
     '/',
     '/index.html',
