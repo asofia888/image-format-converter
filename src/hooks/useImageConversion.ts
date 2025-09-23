@@ -130,9 +130,35 @@ export const useImageConversion = ({
 
     try {
         const content = await zip.generateAsync({ type: 'blob' });
+        const fileName = `converted_images_${Date.now()}.zip`;
+
+        // Check if File System Access API is supported
+        if ('showSaveFilePicker' in window) {
+            try {
+                const fileHandle = await (window as any).showSaveFilePicker({
+                    suggestedName: fileName,
+                    types: [{
+                        description: 'ZIP files',
+                        accept: { 'application/zip': ['.zip'] }
+                    }]
+                });
+
+                const writable = await fileHandle.createWritable();
+                await writable.write(content);
+                await writable.close();
+                return;
+            } catch (e) {
+                // User cancelled or API failed, fall back to traditional download
+                if ((e as Error).name !== 'AbortError') {
+                    console.warn('File System Access API failed:', e);
+                }
+            }
+        }
+
+        // Fallback to traditional download
         const link = document.createElement('a');
         link.href = URL.createObjectURL(content);
-        link.download = `converted_images_${Date.now()}.zip`;
+        link.download = fileName;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
