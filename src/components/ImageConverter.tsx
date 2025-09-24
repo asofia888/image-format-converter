@@ -3,7 +3,6 @@ import type { FileStatus } from '../types';
 import FileUploader from './FileUploader';
 import ImageComparator from './ImageComparator';
 import ConversionControls from './ConversionControls';
-import ImageCropper from './ImageCropper';
 import EditableFileName from './EditableFileName';
 import Icon from './Icon';
 import { useTranslation } from '../hooks/useTranslation';
@@ -24,7 +23,6 @@ const ImageConverter: React.FC = () => {
     isDownloadReady,
     isConverting,
     resizeConfig,
-    isCropperOpen,
     presets,
     activePresetId,
     setResizeConfig,
@@ -35,10 +33,6 @@ const ImageConverter: React.FC = () => {
     resetState,
     handleDownloadZip,
     getConvertedFileName,
-    handleOpenCropper,
-    handleCloseCropper,
-    handleApplyCrop,
-    handleResetCrop,
     handleSavePreset,
     handleApplyPreset,
     handleDeletePreset,
@@ -64,18 +58,9 @@ const ImageConverter: React.FC = () => {
     );
   }, [statusIconMap]);
 
-  // Debug logging
-  console.log('DEBUG: ImageConverter render - isCropperOpen:', isCropperOpen, 'files[0]:', !!files[0]);
 
   return (
     <div className="bg-white/60 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-6 md:p-8 w-full">
-       {isCropperOpen && files[0] && (
-         <ImageCropper
-          imageSrc={files[0].originalSrc}
-          onConfirm={handleApplyCrop}
-          onCancel={handleCloseCropper}
-         />
-       )}
       <div className="sr-only" aria-live="polite" aria-atomic="true">{liveRegionMessage}</div>
       {files.length === 0 ? (
         <FileUploader onFilesSelect={handleFilesSelect} status={appStatus} error={error ? t(error.key, error.params) : null} />
@@ -197,9 +182,6 @@ const ImageConverter: React.FC = () => {
                 resizeConfig={resizeConfig}
                 setResizeConfig={setResizeConfig}
                 originalDimensions={!isBatchMode && files[0] ? { width: files[0].originalWidth, height: files[0].originalHeight } : null}
-                onOpenCropper={handleOpenCropper}
-                onResetCrop={handleResetCrop}
-                isCropped={!isBatchMode && files[0] ? files[0].originalWidth !== files[0].trueOriginalWidth || files[0].originalHeight !== files[0].trueOriginalHeight : false}
                 presets={presets}
                 activePresetId={activePresetId}
                 onSavePreset={handleSavePreset}

@@ -4,7 +4,6 @@ import { useFileManager } from './useFileManager';
 import { usePresetManager } from './usePresetManager';
 import { useConversionSettings } from './useConversionSettings';
 import { useImageConversion } from './useImageConversion';
-import { useCropResize } from './useCropResize';
 
 export const useImageConverter = () => {
   const [liveRegionMessage, setLiveRegionMessage] = useState('');
@@ -71,18 +70,6 @@ export const useImageConverter = () => {
     t
   });
 
-  const {
-    isCropperOpen,
-    handleOpenCropper,
-    handleCloseCropper,
-    handleApplyCrop,
-    handleResetCrop
-  } = useCropResize({
-    files,
-    updateFileStatus,
-    setResizeConfig,
-    setError
-  });
 
   const isBatchMode = useMemo(() => files.length > 1, [files]);
 
@@ -122,7 +109,6 @@ export const useImageConverter = () => {
     isDownloadReady,
     isConverting,
     resizeConfig,
-    isCropperOpen,
     presets,
     activePresetId,
     setResizeConfig,
@@ -133,10 +119,6 @@ export const useImageConverter = () => {
     resetState,
     handleDownloadZip,
     getConvertedFileName,
-    handleOpenCropper,
-    handleCloseCropper,
-    handleApplyCrop,
-    handleResetCrop,
     handleSavePreset,
     handleApplyPreset,
     handleDeletePreset,

@@ -21,9 +21,6 @@ interface ConversionControlsProps {
   resizeConfig: ResizeConfig;
   setResizeConfig: React.Dispatch<React.SetStateAction<ResizeConfig>>;
   originalDimensions: { width: number; height: number } | null;
-  onOpenCropper: () => void;
-  onResetCrop: () => void;
-  isCropped: boolean;
   presets: Preset[];
   activePresetId: string;
   onSavePreset: (name: string) => boolean;
@@ -48,9 +45,6 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
   resizeConfig,
   setResizeConfig,
   originalDimensions,
-  onOpenCropper,
-  onResetCrop,
-  isCropped,
   presets,
   activePresetId,
   onSavePreset,
@@ -250,36 +244,6 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
               />
             </div>
           )}
-        </div>
-        {!isBatchMode && (
-        <div className="flex flex-col">
-            <h3 className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">{t('editToolsLabel')}</h3>
-            <div className="flex items-center gap-2">
-                <button
-                    onClick={() => {
-                        console.log('DEBUG: Crop button clicked');
-                        onOpenCropper();
-                    }}
-                    className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-800 focus:ring-purple-500"
-                    >
-                    <Icon name="crop" className="w-5 h-5 mr-2"/>
-                    {t('cropButton')}
-                </button>
-                {isCropped && (
-                    <button
-                        onClick={onResetCrop}
-                        title={t('resetCropButton')}
-                        className="p-2 text-slate-700 dark:text-slate-300 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-800 focus:ring-purple-500"
-                    >
-                        <Icon name="reset" className="w-5 h-5"/>
-                    </button>
-                )}
-            </div>
-        </div>
-        )}
-        {/* DEBUG INFO */}
-        <div className="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded text-xs">
-            DEBUG: isBatchMode = {isBatchMode.toString()}
         </div>
       </div>
       
