@@ -32,7 +32,7 @@ interface ConversionControlsProps {
 }
 
 const ConversionControls: React.FC<ConversionControlsProps> = ({
-  originalFileType,
+  originalFileType: _originalFileType,
   targetFormat,
   setTargetFormat,
   quality,
