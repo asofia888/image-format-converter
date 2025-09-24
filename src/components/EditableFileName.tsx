@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Icon from './Icon';
 
 interface EditableFileNameProps {
@@ -18,43 +18,51 @@ const EditableFileName: React.FC<EditableFileNameProps> = ({
   const [tempName, setTempName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const getFileNameWithoutExtension = (fileName: string) => {
-    const lastDotIndex = fileName.lastIndexOf('.');
-    return lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName;
-  };
+  const { displayName, extension } = useMemo(() => {
+    const getFileNameWithoutExtension = (fileName: string) => {
+      const lastDotIndex = fileName.lastIndexOf('.');
+      return lastDotIndex > 0 ? fileName.substring(0, lastDotIndex) : fileName;
+    };
 
-  const getFileExtension = (fileName: string) => {
-    const lastDotIndex = fileName.lastIndexOf('.');
-    return lastDotIndex > 0 ? fileName.substring(lastDotIndex) : '';
-  };
+    const getFileExtension = (fileName: string) => {
+      const lastDotIndex = fileName.lastIndexOf('.');
+      return lastDotIndex > 0 ? fileName.substring(lastDotIndex) : '';
+    };
 
-  const displayName = customName || getFileNameWithoutExtension(originalName);
-  const extension = getFileExtension(originalName);
+    return {
+      displayName: customName || getFileNameWithoutExtension(originalName),
+      extension: getFileExtension(originalName)
+    };
+  }, [originalName, customName]);
 
-  const handleStartEdit = () => {
+  const handleStartEdit = useCallback(() => {
     setTempName(displayName);
     setIsEditing(true);
-  };
+  }, [displayName]);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (tempName.trim()) {
       onNameChange(tempName.trim());
     }
     setIsEditing(false);
-  };
+  }, [tempName, onNameChange]);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setTempName('');
     setIsEditing(false);
-  };
+  }, []);
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSave();
     } else if (e.key === 'Escape') {
       handleCancel();
     }
-  };
+  }, [handleSave, handleCancel]);
+
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setTempName(e.target.value);
+  }, []);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -70,7 +78,7 @@ const EditableFileName: React.FC<EditableFileNameProps> = ({
           ref={inputRef}
           type="text"
           value={tempName}
-          onChange={(e) => setTempName(e.target.value)}
+          onChange={handleInputChange}
           onKeyDown={handleKeyDown}
           onBlur={handleSave}
           className="flex-1 px-2 py-1 text-sm border border-purple-300 dark:border-purple-600 rounded bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import type { FileStatus } from '../types';
 import FileUploader from './FileUploader';
 import ImageComparator from './ImageComparator';
@@ -46,14 +46,15 @@ const ImageConverter: React.FC = () => {
     handleRemoveFile,
   } = useImageConverter();
 
-  const renderStatusIcon = (status: FileStatus) => {
-    const statusMap = {
-      pending: { text: t('fileStatusPending'), icon: 'pending', class: 'text-slate-400 dark:text-slate-500' },
-      converting: { text: t('fileStatusConverting'), icon: 'spinner', class: 'text-purple-500 dark:text-purple-400 animate-spin' },
-      success: { text: t('fileStatusSuccess'), icon: 'success', class: 'text-green-500 dark:text-green-400' },
-      error: { text: t('fileStatusError'), icon: 'error', class: 'text-red-500 dark:text-red-400' },
-    };
-    const currentStatus = statusMap[status];
+  const statusIconMap = useMemo(() => ({
+    pending: { text: t('fileStatusPending'), icon: 'pending', class: 'text-slate-400 dark:text-slate-500' },
+    converting: { text: t('fileStatusConverting'), icon: 'spinner', class: 'text-purple-500 dark:text-purple-400 animate-spin' },
+    success: { text: t('fileStatusSuccess'), icon: 'success', class: 'text-green-500 dark:text-green-400' },
+    error: { text: t('fileStatusError'), icon: 'error', class: 'text-red-500 dark:text-red-400' },
+  }), [t]);
+
+  const renderStatusIcon = useCallback((status: FileStatus) => {
+    const currentStatus = statusIconMap[status];
 
     return (
       <div className="flex items-center justify-center" title={currentStatus.text}>
@@ -61,7 +62,7 @@ const ImageConverter: React.FC = () => {
         <span className="sr-only">{currentStatus.text}</span>
       </div>
     );
-  };
+  }, [statusIconMap]);
 
   return (
     <div className="bg-white/60 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-6 md:p-8 w-full">

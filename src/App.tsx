@@ -22,6 +22,10 @@ const App: React.FC = () => {
     setModalContent(null);
   }, []);
 
+  const handleOpenTerms = useCallback(() => handleOpenModal('terms'), [handleOpenModal]);
+  const handleOpenDisclaimer = useCallback(() => handleOpenModal('disclaimer'), [handleOpenModal]);
+  const handleOpenHowTo = useCallback(() => handleOpenModal('howTo'), [handleOpenModal]);
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 flex flex-col items-center p-4 font-sans relative transition-colors duration-300">
       <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
@@ -48,9 +52,9 @@ const App: React.FC = () => {
           tag="p"
         />
         <div className="mt-2 flex justify-center gap-4">
-            <button onClick={() => handleOpenModal('terms')} className="hover:text-purple-500 dark:hover:text-purple-400 transition-colors">{t('footerTerms')}</button>
-            <button onClick={() => handleOpenModal('disclaimer')} className="hover:text-purple-500 dark:hover:text-purple-400 transition-colors">{t('footerDisclaimer')}</button>
-            <button onClick={() => handleOpenModal('howTo')} className="hover:text-purple-500 dark:hover:text-purple-400 transition-colors">{t('footerHowTo')}</button>
+            <button onClick={handleOpenTerms} className="hover:text-purple-500 dark:hover:text-purple-400 transition-colors">{t('footerTerms')}</button>
+            <button onClick={handleOpenDisclaimer} className="hover:text-purple-500 dark:hover:text-purple-400 transition-colors">{t('footerDisclaimer')}</button>
+            <button onClick={handleOpenHowTo} className="hover:text-purple-500 dark:hover:text-purple-400 transition-colors">{t('footerHowTo')}</button>
         </div>
       </footer>
        {modalContent && (

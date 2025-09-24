@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import Icon from './Icon';
 import EditableFileName from './EditableFileName';
 import { useTranslation } from '../hooks/useTranslation';
@@ -41,6 +41,29 @@ const ImageComparator: React.FC<ImageComparatorProps> = ({
     const [isDragging, setIsDragging] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const { t } = useTranslation();
+
+    // Memoize slider change handler
+    const handleSliderChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        setSliderPosition(Number(e.target.value));
+    }, []);
+
+    // Memoize file size calculations
+    const fileSizeInfo = useMemo(() => {
+        if (!beforeFileSize || !afterFileSize) return null;
+
+        const beforeSize = formatBytes(beforeFileSize);
+        const afterSize = formatBytes(afterFileSize);
+        const savings = beforeFileSize > afterFileSize
+            ? Math.round(((beforeFileSize - afterFileSize) / beforeFileSize) * 100)
+            : 0;
+
+        return { beforeSize, afterSize, savings };
+    }, [beforeFileSize, afterFileSize]);
+
+    // Memoize dimensions display
+    const dimensionsDisplay = useMemo(() => {
+        return dimensions ? `${dimensions.width} x ${dimensions.height}px` : null;
+    }, [dimensions]);
 
     const handleMove = useCallback((clientX: number) => {
         if (!isDragging || !containerRef.current) return;
@@ -134,7 +157,7 @@ const ImageComparator: React.FC<ImageComparatorProps> = ({
                     min="0"
                     max="100"
                     value={sliderPosition}
-                    onChange={(e) => setSliderPosition(Number(e.target.value))}
+                    onChange={handleSliderChange}
                     className="sr-only"
                     aria-label="Image comparison slider"
                 />
@@ -166,8 +189,8 @@ const ImageComparator: React.FC<ImageComparatorProps> = ({
                     </div>
                      {beforeFileSize != null && (
                          <div className="text-xs space-x-2">
-                             <span className="font-semibold">{formatBytes(beforeFileSize)}</span>
-                             {dimensions && <span>{`(${dimensions.width}x${dimensions.height})`}</span>}
+                             <span className="font-semibold">{fileSizeInfo?.beforeSize || formatBytes(beforeFileSize)}</span>
+                             {dimensionsDisplay && <span>({dimensionsDisplay})</span>}
                          </div>
                      )}
                 </div>
@@ -175,10 +198,10 @@ const ImageComparator: React.FC<ImageComparatorProps> = ({
                     <p className="truncate font-medium text-slate-800 dark:text-slate-200" title={afterFileName || '...'}>{afterFileName || '...'}</p>
                     {afterFileSize != null && (
                         <div className="flex items-center justify-center gap-2 text-xs">
-                            <span className="font-semibold">{formatBytes(afterFileSize)}</span>
-                            {beforeFileSize != null && afterFileSize < beforeFileSize && (
+                            <span className="font-semibold">{fileSizeInfo?.afterSize || formatBytes(afterFileSize)}</span>
+                            {fileSizeInfo?.savings && fileSizeInfo.savings > 0 && (
                                 <span className="text-green-600 dark:text-green-400 font-semibold">
-                                    ({(((beforeFileSize - afterFileSize) / beforeFileSize) * 100).toFixed(0)}% smaller)
+                                    ({fileSizeInfo.savings}% smaller)
                                 </span>
                             )}
                         </div>
