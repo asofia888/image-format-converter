@@ -20,6 +20,7 @@ export const useCropResize = ({
   const [isCropperOpen, setIsCropperOpen] = useState(false);
 
   const handleOpenCropper = useCallback(() => {
+    console.log('DEBUG: handleOpenCropper called, setting isCropperOpen to true');
     setIsCropperOpen(true);
   }, []);
 

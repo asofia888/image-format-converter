@@ -256,7 +256,10 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
             <h3 className="block text-sm font-medium text-slate-600 dark:text-slate-400 mb-2">{t('editToolsLabel')}</h3>
             <div className="flex items-center gap-2">
                 <button
-                    onClick={onOpenCropper}
+                    onClick={() => {
+                        console.log('DEBUG: Crop button clicked');
+                        onOpenCropper();
+                    }}
                     className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-800 focus:ring-purple-500"
                     >
                     <Icon name="crop" className="w-5 h-5 mr-2"/>

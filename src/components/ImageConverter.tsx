@@ -66,8 +66,9 @@ const ImageConverter: React.FC = () => {
 
   return (
     <div className="bg-white/60 dark:bg-slate-800/50 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl p-6 md:p-8 w-full">
+       {console.log('DEBUG: ImageConverter render - isCropperOpen:', isCropperOpen, 'files[0]:', !!files[0])}
        {isCropperOpen && files[0] && (
-         <ImageCropper 
+         <ImageCropper
           imageSrc={files[0].originalSrc}
           onConfirm={handleApplyCrop}
           onCancel={handleCloseCropper}
