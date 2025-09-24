@@ -32,7 +32,7 @@ const App: React.FC = () => {
 
   return (
     <ErrorBoundary level="app">
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 flex flex-col items-center p-4 font-sans relative transition-colors duration-300">
+      <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-sans relative transition-colors duration-300">
         <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
           <ErrorBoundary level="component">
             <ThemeSwitcher />
@@ -41,7 +41,9 @@ const App: React.FC = () => {
             <LanguageSwitcher />
           </ErrorBoundary>
         </div>
-        <div className="w-full flex flex-col items-center flex-grow">
+
+        {/* Main content area that grows to fill available space */}
+        <div className="flex-grow flex flex-col items-center p-4 overflow-auto">
           <header className="text-center my-8 flex flex-col items-center gap-4">
               <img src="/logo.png" alt={t('appTitle')} className="w-16 h-16" />
               <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-400 dark:to-purple-500">
@@ -51,13 +53,15 @@ const App: React.FC = () => {
               {t('appDescription')}
               </p>
           </header>
-          <main className="w-full max-w-5xl">
+          <main className="w-full max-w-5xl mb-8">
               <ErrorBoundary level="feature">
                 <ImageConverter />
               </ErrorBoundary>
           </main>
         </div>
-        <footer className="w-full mt-8 text-center text-sm text-slate-500 dark:text-slate-500">
+
+        {/* Footer that sticks to bottom */}
+        <footer className="flex-shrink-0 w-full py-4 px-4 text-center text-sm text-slate-500 dark:text-slate-500 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-sm border-t border-slate-200/50 dark:border-slate-700/50">
           <SafeHTML
             html={t('footerText', { year: new Date().getFullYear() })}
             tag="p"
