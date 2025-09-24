@@ -67,19 +67,10 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
     { value: 'webp', label: 'WebP' },
   ], []);
 
-  // Ensure that in batch mode, all options are available, but in single file mode, the original format is excluded.
+  // Always show all format options - even same-format conversion can be useful (quality adjustment, resizing)
   const formatOptions = useMemo(() => {
-    if (isBatchMode) return allFormatOptions;
-
-    // Handle both 'image/jpeg' and 'image/jpg' for JPEG files
-    return allFormatOptions.filter(opt => {
-      const imageType = `image/${opt.value}`;
-      if (opt.value === 'jpeg') {
-        return originalFileType !== 'image/jpeg' && originalFileType !== 'image/jpg';
-      }
-      return imageType !== originalFileType;
-    });
-  }, [isBatchMode, originalFileType, allFormatOptions]);
+    return allFormatOptions;
+  }, [allFormatOptions]);
 
   const showQualitySlider = useMemo(() => targetFormat === 'jpeg' || targetFormat === 'webp', [targetFormat]);
 
