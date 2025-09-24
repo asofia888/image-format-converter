@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { usePWA } from '../hooks/usePWA';
-import { useTranslation } from '../hooks/useTranslation';
 import Icon from './Icon';
 
 const PWAInstallPrompt: React.FC = () => {
-  const { t } = useTranslation();
   const { isInstallable, isInstalled, isStandalone, promptInstall } = usePWA();
   const [isVisible, setIsVisible] = useState(true);
   const [isInstalling, setIsInstalling] = useState(false);

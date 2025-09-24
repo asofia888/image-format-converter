@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { usePWA } from '../hooks/usePWA';
-import { useTranslation } from '../hooks/useTranslation';
 import Icon from './Icon';
 
 const ConnectionStatus: React.FC = () => {
-  const { t } = useTranslation();
   const { isOnline, updateAvailable } = usePWA();
   const [showOfflineMessage, setShowOfflineMessage] = useState(false);
   const [showUpdateMessage, setShowUpdateMessage] = useState(false);
