@@ -17,14 +17,12 @@
       style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
       img-src 'self' data: blob:;
       font-src 'self' https://fonts.gstatic.com;
-      connect-src 'self' https://aistudiocdn.com;
+      connect-src 'self' https://aistudiocdn.com https://cdn.tailwindcss.com;
       object-src 'none';
-      frame-ancestors 'none';
       base-uri 'self';
       form-action 'self';
     ">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta http-equiv="Permissions-Policy" content="
@@ -36,6 +34,7 @@
     <!-- PWA -->
     <link rel="manifest" href="/manifest.json" />
     <meta name="theme-color" content="#8b5cf6" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="ImageConverter" />
@@ -101,7 +100,6 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>

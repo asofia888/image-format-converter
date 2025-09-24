@@ -64,6 +64,14 @@ self.addEventListener('fetch', (event) => {
 
   if (request.method !== 'GET') return;
 
+  // Skip caching for external CDNs and chrome-extension requests
+  if (url.hostname !== self.location.hostname &&
+      (url.hostname === 'cdn.tailwindcss.com' ||
+       url.hostname === 'aistudiocdn.com' ||
+       url.protocol === 'chrome-extension:')) {
+    return;
+  }
+
   if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
     event.respondWith(cacheFirst(request));
   } else if (url.pathname.endsWith('.png') || url.pathname.endsWith('.jpg') || url.pathname.endsWith('.jpeg') || url.pathname.endsWith('.gif') || url.pathname.endsWith('.webp') || url.pathname.endsWith('.svg')) {
