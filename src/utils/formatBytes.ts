@@ -13,7 +13,7 @@ export interface FileSizeInfo {
     savings: number;
 }
 
-export const calculateFileSizeInfo = (beforeFileSize: number | null, afterFileSize: number | null): FileSizeInfo | null => {
+export const calculateFileSizeInfo = (beforeFileSize: number | null | undefined, afterFileSize: number | null | undefined): FileSizeInfo | null => {
     if (!beforeFileSize || !afterFileSize) return null;
 
     const beforeSize = formatBytes(beforeFileSize);
