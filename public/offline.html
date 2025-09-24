@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Converter - Offline</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      padding: 20px;
+    }
+
+    .offline-container {
+      text-align: center;
+      max-width: 400px;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    }
+
+    .offline-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    p {
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
+    .retry-button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .retry-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .offline-features {
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .feature-icon {
+      margin-right: 10px;
+      font-size: 16px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+      }
+    }
+
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="offline-container">
+    <div class="offline-icon">🌐</div>
+    <h1>You're Offline</h1>
+    <p>It looks like you've lost your internet connection. Don't worry - Image Converter can still work offline with cached content!</p>
+
+    <button class="retry-button" onclick="retryConnection()">
+      <span id="retry-text">Retry Connection</span>
+      <span id="loading" class="loading" style="display: none;"></span>
+    </button>
+
+    <div class="offline-features">
+      <div class="feature">
+        <span class="feature-icon">📱</span>
+        <span>App works offline with cached files</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">⚡</span>
+        <span>Fast loading from cache</span>
+      </div>
+      <div class="feature">
+        <span class="feature-icon">🔄</span>
+        <span>Auto-sync when online</span>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function retryConnection() {
+      const button = document.querySelector('.retry-button');
+      const retryText = document.getElementById('retry-text');
+      const loading = document.getElementById('loading');
+
+      // Show loading state
+      retryText.style.display = 'none';
+      loading.style.display = 'inline-block';
+      button.disabled = true;
+
+      // Check if we're back online
+      if (navigator.onLine) {
+        // Try to fetch the main app
+        fetch('/', { cache: 'no-cache' })
+          .then(response => {
+            if (response.ok) {
+              window.location.href = '/';
+            } else {
+              throw new Error('App not available');
+            }
+          })
+          .catch(() => {
+            // Still offline, reset button
+            retryText.style.display = 'inline';
+            loading.style.display = 'none';
+            button.disabled = false;
+          });
+      } else {
+        // Still offline, reset button after a delay
+        setTimeout(() => {
+          retryText.style.display = 'inline';
+          loading.style.display = 'none';
+          button.disabled = false;
+        }, 2000);
+      }
+    }
+
+    // Listen for online/offline events
+    window.addEventListener('online', () => {
+      console.log('Back online!');
+      // Automatically retry when we come back online
+      setTimeout(() => {
+        retryConnection();
+      }, 1000);
+    });
+
+    window.addEventListener('offline', () => {
+      console.log('Gone offline');
+    });
+
+    // Update UI based on connection status
+    function updateConnectionStatus() {
+      const isOnline = navigator.onLine;
+      if (isOnline) {
+        document.querySelector('h1').textContent = 'Connection Restored';
+        document.querySelector('p').textContent = 'Your internet connection has been restored. Click retry to return to the app.';
+      }
+    }
+
+    // Check connection status on load
+    updateConnectionStatus();
+
+    // Periodically check if we can reach the main app
+    setInterval(() => {
+      if (navigator.onLine) {
+        fetch('/', {
+          cache: 'no-cache',
+          mode: 'no-cors'
+        }).catch(() => {
+          // Ignore errors, we're just checking connectivity
+        });
+      }
+    }, 30000); // Check every 30 seconds
+  </script>
+</body>
+</html>

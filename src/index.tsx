@@ -68,26 +68,30 @@ root.render(
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // First, unregister any existing service workers
-    navigator.serviceWorker.getRegistrations().then(registrations => {
-      registrations.forEach(registration => {
-        registration.unregister().then(() => {
-          console.log('Existing Service Worker unregistered');
+    navigator.serviceWorker.register('/sw.js')
+      .then((registration) => {
+        console.log('Service Worker registered successfully:', registration);
+
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          if (newWorker) {
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('New content is available; please refresh.');
+                if (confirm('New version available! Refresh to update?')) {
+                  newWorker.postMessage({ type: 'SKIP_WAITING' });
+                }
+              }
+            });
+          }
         });
+      })
+      .catch((error) => {
+        console.log('Service Worker registration failed:', error);
       });
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
     });
-
-    // Clear all caches
-    if ('caches' in window) {
-      caches.keys().then(cacheNames => {
-        cacheNames.forEach(cacheName => {
-          caches.delete(cacheName);
-        });
-      });
-    }
-
-    // For now, we'll disable service worker to resolve caching issues
-    // This ensures users always get the latest content
-    console.log('Service Worker disabled to prevent caching issues');
   });
 }

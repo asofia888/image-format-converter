@@ -8,6 +8,8 @@ import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from './hooks/useTranslation';
 import ThemeSwitcher from './components/ThemeSwitcher';
 import InfoModal from './components/InfoModal';
+import PWAInstallPrompt from './components/PWAInstallPrompt';
+import ConnectionStatus from './components/ConnectionStatus';
 import { SafeHTML } from './utils/sanitizeHtml';
 
 type ModalContentKey = 'terms' | 'disclaimer' | 'howTo';
@@ -77,6 +79,14 @@ const App: React.FC = () => {
 
         {/* Development Error Testing Component */}
         <ErrorTestComponent />
+
+        {/* PWA Components */}
+        <ErrorBoundary level="component">
+          <PWAInstallPrompt />
+        </ErrorBoundary>
+        <ErrorBoundary level="component">
+          <ConnectionStatus />
+        </ErrorBoundary>
       </div>
     </ErrorBoundary>
   );
