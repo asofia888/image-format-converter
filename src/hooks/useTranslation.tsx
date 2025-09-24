@@ -3,15 +3,16 @@ import React, { createContext, useState, useContext, useMemo } from 'react';
 // FIX: Reverted to embedding translations to resolve module loading errors in the environment.
 // This ensures the application can run without relying on potentially problematic static file imports.
 const en = {
+  "_version": "c2a5c96_refactor_2024",
   "appTitle": "Image Format Converter",
-  "appDescription": "Convert JPEG, PNG, and WebP images instantly in your browser.",
+  "appDescription": "Convert JPEG, PNG, and WebP images instantly in your browser - No AVIF, BMP, or TIFF in this version.",
   "footerText": "&copy; {year} Image Converter. All rights reserved.",
   "footerTerms": "Terms of Service",
   "footerDisclaimer": "Disclaimer",
   "footerHowTo": "How to Use",
   "uploadCTA": "Click to upload",
   "uploadHint": ", or drag & drop files or a folder",
-  "uploadFormats": "JPEG, PNG, or WebP",
+  "uploadFormats": "JPEG, PNG, or WebP (AVIF/BMP/TIFF not supported in this version)",
   "originalLabel": "Original",
   "convertedLabel": "Converted",
   "convertingLabel": "Converting...",
@@ -82,15 +83,16 @@ const en = {
 };
 
 const ja = {
+  "_version": "c2a5c96_refactor_2024",
   "appTitle": "画像フォーマットコンバーター",
-  "appDescription": "ブラウザでJPEG、PNG、WebP画像を瞬時に変換します。",
+  "appDescription": "ブラウザでJPEG、PNG、WebP画像を瞬時に変換します（このバージョンではAVIF、BMP、TIFFは未対応）。",
   "footerText": "&copy; {year} Image Converter. All rights reserved.",
   "footerTerms": "利用規約",
   "footerDisclaimer": "免責事項",
   "footerHowTo": "使用方法",
   "uploadCTA": "クリックしてアップロード",
   "uploadHint": "、またはファイルやフォルダをドラッグ＆ドロップ",
-  "uploadFormats": "JPEG, PNG, または WebP",
+  "uploadFormats": "JPEG, PNG, または WebP（このバージョンではAVIF/BMP/TIFF未対応）",
   "originalLabel": "変換前",
   "convertedLabel": "変換後",
   "convertingLabel": "変換中...",
