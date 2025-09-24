@@ -274,6 +274,10 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
             </div>
         </div>
         )}
+        {/* DEBUG INFO */}
+        <div className="mt-2 p-2 bg-yellow-100 dark:bg-yellow-900/20 rounded text-xs">
+            DEBUG: isBatchMode = {isBatchMode.toString()}
+        </div>
       </div>
       
       {/* Resize Controls */}
