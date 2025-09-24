@@ -20,60 +20,78 @@ export const useFileManager = () => {
     };
   }, [files]);
 
-  const processSelectedFile = async (file: File): Promise<ProcessedFile> => {
-    const baseInfo = {
-      id: `${file.name}-${file.lastModified}`,
-      file,
-      originalSrc: '',
-      originalSize: file.size,
-      originalWidth: 0,
-      originalHeight: 0,
-      trueOriginalWidth: 0,
-      trueOriginalHeight: 0,
-      convertedSrc: null,
-      convertedBlob: null,
-      convertedSize: null,
-    };
+  const createBaseFileInfo = (file: File) => ({
+    id: `${file.name}-${file.lastModified}`,
+    file,
+    originalSrc: '',
+    originalSize: file.size,
+    originalWidth: 0,
+    originalHeight: 0,
+    trueOriginalWidth: 0,
+    trueOriginalHeight: 0,
+    convertedSrc: null,
+    convertedBlob: null,
+    convertedSize: null,
+  });
 
+  const validateFileSize = (file: File) => {
     if (file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
       return {
-        ...baseInfo,
-        status: 'error' as const,
-        error: {
-          key: 'errorFileTooLarge',
-          params: { fileName: file.name, fileSize: formatBytes(file.size), maxSize: MAX_FILE_SIZE_MB }
-        },
+        key: 'errorFileTooLarge' as const,
+        params: { fileName: file.name, fileSize: formatBytes(file.size), maxSize: MAX_FILE_SIZE_MB }
       };
     }
+    return null;
+  };
 
-    try {
+  const loadImageDimensions = (file: File): Promise<{ originalSrc: string; width: number; height: number }> => {
+    return new Promise((resolve, reject) => {
       const originalSrc = URL.createObjectURL(file);
       const img = new Image();
 
-      return new Promise((resolve) => {
-        img.onload = () => {
-          resolve({
-            ...baseInfo,
-            status: 'pending' as const,
-            originalSrc,
-            originalWidth: img.width,
-            originalHeight: img.height,
-            trueOriginalWidth: img.width,
-            trueOriginalHeight: img.height,
-            error: null,
-          });
-        };
+      img.onload = () => {
+        resolve({
+          originalSrc,
+          width: img.width,
+          height: img.height,
+        });
+      };
 
-        img.onerror = () => {
-          resolve({
-            ...baseInfo,
-            status: 'error' as const,
-            error: { key: 'errorLoadImage' },
-          });
-        };
+      img.onerror = () => {
+        URL.revokeObjectURL(originalSrc);
+        reject(new Error('Failed to load image'));
+      };
 
-        img.src = originalSrc;
-      });
+      img.src = originalSrc;
+    });
+  };
+
+  const processSelectedFile = async (file: File): Promise<ProcessedFile> => {
+    const baseInfo = createBaseFileInfo(file);
+
+    // Validate file size
+    const sizeError = validateFileSize(file);
+    if (sizeError) {
+      return {
+        ...baseInfo,
+        status: 'error' as const,
+        error: sizeError,
+      };
+    }
+
+    // Load image dimensions
+    try {
+      const { originalSrc, width, height } = await loadImageDimensions(file);
+      return {
+        ...baseInfo,
+        status: 'pending' as const,
+        originalSrc,
+        originalWidth: width,
+        originalHeight: height,
+        trueOriginalWidth: width,
+        trueOriginalHeight: height,
+        error: null,
+      };
     } catch (error) {
       return {
         ...baseInfo,

@@ -2,7 +2,7 @@ import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import Icon from './Icon';
 import EditableFileName from './EditableFileName';
 import { useTranslation } from '../hooks/useTranslation';
-import { formatBytes } from '../utils/formatBytes';
+import { formatBytes, calculateFileSizeInfo } from '../utils/formatBytes';
 
 interface ImageComparatorProps {
     beforeSrc: string;
@@ -48,17 +48,10 @@ const ImageComparator: React.FC<ImageComparatorProps> = ({
     }, []);
 
     // Memoize file size calculations
-    const fileSizeInfo = useMemo(() => {
-        if (!beforeFileSize || !afterFileSize) return null;
-
-        const beforeSize = formatBytes(beforeFileSize);
-        const afterSize = formatBytes(afterFileSize);
-        const savings = beforeFileSize > afterFileSize
-            ? Math.round(((beforeFileSize - afterFileSize) / beforeFileSize) * 100)
-            : 0;
-
-        return { beforeSize, afterSize, savings };
-    }, [beforeFileSize, afterFileSize]);
+    const fileSizeInfo = useMemo(() =>
+        calculateFileSizeInfo(beforeFileSize, afterFileSize),
+        [beforeFileSize, afterFileSize]
+    );
 
     // Memoize dimensions display
     const dimensionsDisplay = useMemo(() => {
