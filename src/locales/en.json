@@ -72,5 +72,12 @@
   "presetSaveSuccess": "Preset '{presetName}' saved.",
   "presetDeleteSuccess": "Preset '{presetName}' deleted.",
   "errorPresetNameExists": "A preset with this name already exists.",
-  "errorPresetNameEmpty": "Preset name cannot be empty."
+  "errorPresetNameEmpty": "Preset name cannot be empty.",
+  "errorBoundaryAppTitle": "Something went wrong",
+  "errorBoundaryAppMessage": "We're sorry, but something unexpected happened. Please try refreshing the page or contact support if the problem persists.",
+  "errorBoundaryComponentTitle": "Component Error",
+  "errorBoundaryComponentMessage": "This component encountered an error. You can try to reload it or refresh the entire page.",
+  "errorBoundaryRetry": "Try Again",
+  "errorBoundaryReload": "Reload Page",
+  "errorBoundaryErrorId": "Error ID"
 }

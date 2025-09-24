@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import ErrorBoundary from './components/ErrorBoundary';
 import { TranslationProvider } from './hooks/useTranslation';
 import { ThemeProvider } from './hooks/useTheme';
 
@@ -10,13 +11,58 @@ if (!rootElement) {
 }
 
 const root = ReactDOM.createRoot(rootElement);
+// Global error handler for unhandled promise rejections and errors
+const handleGlobalError = (error: Error, errorInfo?: any) => {
+  console.error('🚨 Global Error:', error);
+  if (errorInfo) {
+    console.error('Error Info:', errorInfo);
+  }
+
+  // Log to error reporting service in production
+  if (import.meta.env.PROD) {
+    // Send to error reporting service
+    try {
+      const errorReport = {
+        type: 'global_error',
+        message: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+      };
+
+      const existingErrors = JSON.parse(localStorage.getItem('globalErrors') || '[]');
+      existingErrors.push(errorReport);
+      localStorage.setItem('globalErrors', JSON.stringify(existingErrors.slice(-5)));
+    } catch (e) {
+      console.warn('Failed to log global error:', e);
+    }
+  }
+};
+
+// Listen for unhandled promise rejections
+window.addEventListener('unhandledrejection', (event) => {
+  handleGlobalError(new Error(`Unhandled Promise Rejection: ${event.reason}`));
+});
+
+// Listen for uncaught errors
+window.addEventListener('error', (event) => {
+  handleGlobalError(new Error(`Uncaught Error: ${event.message}`), {
+    filename: event.filename,
+    lineno: event.lineno,
+    colno: event.colno,
+  });
+});
+
 root.render(
   <React.StrictMode>
-    <ThemeProvider>
-      <TranslationProvider>
-        <App />
-      </TranslationProvider>
-    </ThemeProvider>
+    <ErrorBoundary level="app" onError={handleGlobalError}>
+      <ThemeProvider>
+        <TranslationProvider>
+          <App />
+        </TranslationProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
 

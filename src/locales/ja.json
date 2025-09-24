@@ -72,5 +72,12 @@
   "presetSaveSuccess": "プリセット「{presetName}」を保存しました。",
   "presetDeleteSuccess": "プリセット「{presetName}」を削除しました。",
   "errorPresetNameExists": "この名前のプリセットは既に存在します。",
-  "errorPresetNameEmpty": "プリセット名は空にできません。"
+  "errorPresetNameEmpty": "プリセット名は空にできません。",
+  "errorBoundaryAppTitle": "エラーが発生しました",
+  "errorBoundaryAppMessage": "申し訳ございませんが、予期しないエラーが発生しました。ページを再読み込みするか、問題が解決しない場合はサポートまでお問い合わせください。",
+  "errorBoundaryComponentTitle": "コンポーネントエラー",
+  "errorBoundaryComponentMessage": "このコンポーネントでエラーが発生しました。再試行するか、ページ全体を再読み込みしてください。",
+  "errorBoundaryRetry": "再試行",
+  "errorBoundaryReload": "ページを再読み込み",
+  "errorBoundaryErrorId": "エラーID"
 }
