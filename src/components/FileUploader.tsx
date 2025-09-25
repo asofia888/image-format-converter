@@ -180,7 +180,7 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelect, status, erro
           </p>
           <p className="text-xs text-slate-400 dark:text-slate-500">{t('uploadFormats')}</p>
         </div>
-        <input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} accept="image/jpeg,image/png,image/webp" multiple />
+        <input id="dropzone-file" type="file" className="hidden" onChange={handleFileChange} accept="image/jpeg,image/png,image/webp,image/avif" multiple />
       </label>
       {status === 'error' && error && (
         <div className="mt-4 text-center bg-red-100 dark:bg-red-900/50 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 px-4 py-3 rounded-lg flex items-center">

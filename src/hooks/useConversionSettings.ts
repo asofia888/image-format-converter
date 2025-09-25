@@ -23,7 +23,7 @@ const getInitialSettings = () => {
       const parsed = JSON.parse(item);
       const resizeConfig = { ...defaults.resizeConfig, ...parsed.resizeConfig };
       return {
-        targetFormat: ['webp', 'jpeg', 'png'].includes(parsed.targetFormat) ? parsed.targetFormat : defaults.targetFormat,
+        targetFormat: ['webp', 'jpeg', 'png', 'avif'].includes(parsed.targetFormat) ? parsed.targetFormat : defaults.targetFormat,
         quality: (typeof parsed.quality === 'number' && parsed.quality >= 0.5 && parsed.quality <= 0.99) ? parsed.quality : defaults.quality,
         resizeConfig,
       };

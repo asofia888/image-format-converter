@@ -7,7 +7,8 @@ export const ALLOWED_IMAGE_TYPES = [
   'image/jpeg',
   'image/jpg',
   'image/png',
-  'image/webp'
+  'image/webp',
+  'image/avif'
 ] as const;
 
 // File size limits
@@ -25,6 +26,11 @@ const FILE_SIGNATURES = {
   ],
   webp: [
     [0x52, 0x49, 0x46, 0x46], // RIFF (first 4 bytes of WebP)
+  ],
+  avif: [
+    // ISO BMFF brands for AVIF: 'ftyp' box, brand 'avif' or 'avis'
+    // We'll detect by checking 'ftyp' at offset 4 and brand at offset 8
+    [0x66, 0x74, 0x79, 0x70], // 'ftyp' marker to be used with further checks
   ],
 } as const;
 
@@ -72,6 +78,19 @@ export const validateFileSignature = async (file: File): Promise<boolean> => {
         }
       }
 
+      // Check AVIF signature: ISO BMFF with 'ftyp' and brand 'avif' or 'avis'
+      if (uint8Array.length >= 16) {
+        const ftypMatches = FILE_SIGNATURES.avif[0].every((byte, index) => uint8Array[4 + index] === byte);
+        if (ftypMatches) {
+          const brand0 = String.fromCharCode(uint8Array[8], uint8Array[9], uint8Array[10], uint8Array[11]);
+          const brand1 = String.fromCharCode(uint8Array[12], uint8Array[13], uint8Array[14], uint8Array[15]);
+          if (brand0 === 'avif' || brand0 === 'avis' || brand1 === 'avif' || brand1 === 'avis') {
+            resolve(true);
+            return;
+          }
+        }
+      }
+
       resolve(false);
     };
 
@@ -99,7 +118,7 @@ export const sanitizeFileName = (fileName: string): string => {
  */
 export const validateFileExtension = (fileName: string): boolean => {
   const extension = fileName.toLowerCase().split('.').pop();
-  const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+  const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'avif'];
   return allowedExtensions.includes(extension || '');
 };
 
@@ -125,7 +144,7 @@ export const validateImageFile = async (file: File): Promise<FileValidationResul
   if (!ALLOWED_IMAGE_TYPES.includes(file.type as any)) {
     return {
       isValid: false,
-      error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.',
+      error: 'Invalid file type. Only JPEG, PNG, WebP, and AVIF are allowed.',
     };
   }
 
@@ -133,7 +152,7 @@ export const validateImageFile = async (file: File): Promise<FileValidationResul
   if (!validateFileExtension(file.name)) {
     return {
       isValid: false,
-      error: 'Invalid file extension. Only .jpg, .jpeg, .png, and .webp are allowed.',
+      error: 'Invalid file extension. Only .jpg, .jpeg, .png, .webp, and .avif are allowed.',
     };
   }
 
