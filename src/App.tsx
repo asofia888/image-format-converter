@@ -1,16 +1,18 @@
 
 
-import React, { useState, useCallback } from 'react';
-import ImageConverter from './components/ImageConverter';
+import React, { useState, useCallback, Suspense, lazy } from 'react';
 import ErrorBoundary from './components/ErrorBoundary';
-import ErrorTestComponent from './components/ErrorTestComponent';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import { useTranslation } from './hooks/useTranslation';
 import ThemeSwitcher from './components/ThemeSwitcher';
-import InfoModal from './components/InfoModal';
-import PWAInstallPrompt from './components/PWAInstallPrompt';
-import ConnectionStatus from './components/ConnectionStatus';
 import { SafeHTML } from './utils/sanitizeHtml';
+
+// Lazy load heavy components
+const ImageConverter = lazy(() => import('./components/ImageConverter'));
+const InfoModal = lazy(() => import('./components/InfoModal'));
+const PWAInstallPrompt = lazy(() => import('./components/PWAInstallPrompt'));
+const ConnectionStatus = lazy(() => import('./components/ConnectionStatus'));
+const ErrorTestComponent = lazy(() => import('./components/ErrorTestComponent'));
 
 type ModalContentKey = 'terms' | 'disclaimer' | 'howTo';
 
@@ -55,7 +57,14 @@ const App: React.FC = () => {
           </header>
           <main className="w-full max-w-5xl mb-8">
               <ErrorBoundary level="feature">
-                <ImageConverter />
+                <Suspense fallback={
+                  <div className="flex items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                    <span className="ml-3 text-slate-600 dark:text-slate-400">Loading converter...</span>
+                  </div>
+                }>
+                  <ImageConverter />
+                </Suspense>
               </ErrorBoundary>
           </main>
         </div>
@@ -74,22 +83,34 @@ const App: React.FC = () => {
         </footer>
          {modalContent && (
           <ErrorBoundary level="component">
-            <InfoModal
-                contentKey={modalContent}
-                onClose={handleCloseModal}
-            />
+            <Suspense fallback={
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+              </div>
+            }>
+              <InfoModal
+                  contentKey={modalContent}
+                  onClose={handleCloseModal}
+              />
+            </Suspense>
           </ErrorBoundary>
         )}
 
         {/* Development Error Testing Component */}
-        <ErrorTestComponent />
+        <Suspense fallback={null}>
+          <ErrorTestComponent />
+        </Suspense>
 
         {/* PWA Components */}
         <ErrorBoundary level="component">
-          <PWAInstallPrompt />
+          <Suspense fallback={null}>
+            <PWAInstallPrompt />
+          </Suspense>
         </ErrorBoundary>
         <ErrorBoundary level="component">
-          <ConnectionStatus />
+          <Suspense fallback={null}>
+            <ConnectionStatus />
+          </Suspense>
         </ErrorBoundary>
       </div>
     </ErrorBoundary>
