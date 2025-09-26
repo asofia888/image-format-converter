@@ -1,7 +1,26 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '../../test/test-utils';
+import { renderHook, act } from '@testing-library/react';
 import { useImageConverter } from '../useImageConverter';
-import { createMockFile } from '../../test/test-utils';
+import { TranslationProvider } from '../useTranslation';
+import { ThemeProvider } from '../useTheme';
+import React from 'react';
+
+const createMockFile = (
+  name: string = 'test.jpg',
+  size: number = 1024,
+  type: string = 'image/jpeg'
+): File => {
+  const blob = new Blob([''], { type });
+  return new File([blob], name, { type, lastModified: Date.now() });
+};
+
+const wrapper = ({ children }: { children: React.ReactNode }) => (
+  <ThemeProvider>
+    <TranslationProvider>
+      {children}
+    </TranslationProvider>
+  </ThemeProvider>
+);
 
 // Mock the worker
 vi.mock('../../workers/converter.worker.ts?worker', () => ({
@@ -20,7 +39,7 @@ describe('useImageConverter', () => {
   });
 
   it('should initialize with default state', () => {
-    const { result } = renderHook(() => useImageConverter());
+    const { result } = renderHook(() => useImageConverter(), { wrapper });
 
     expect(result.current.files).toEqual([]);
     expect(result.current.targetFormat).toBe('webp');
@@ -32,7 +51,7 @@ describe('useImageConverter', () => {
   });
 
   it('should handle file selection', () => {
-    const { result } = renderHook(() => useImageConverter());
+    const { result } = renderHook(() => useImageConverter(), { wrapper });
 
     const files = [createMockFile('test.jpg', 1024, 'image/jpeg')];
 
@@ -45,7 +64,7 @@ describe('useImageConverter', () => {
   });
 
   it('should update target format', () => {
-    const { result } = renderHook(() => useImageConverter());
+    const { result } = renderHook(() => useImageConverter(), { wrapper });
 
     act(() => {
       result.current.setTargetFormat('png');
@@ -55,7 +74,7 @@ describe('useImageConverter', () => {
   });
 
   it('should update quality', () => {
-    const { result } = renderHook(() => useImageConverter());
+    const { result } = renderHook(() => useImageConverter(), { wrapper });
 
     act(() => {
       result.current.setQuality(0.8);
@@ -65,7 +84,7 @@ describe('useImageConverter', () => {
   });
 
   it('should reset state', () => {
-    const { result } = renderHook(() => useImageConverter());
+    const { result } = renderHook(() => useImageConverter(), { wrapper });
 
     // First add some files
     act(() => {
@@ -85,7 +104,7 @@ describe('useImageConverter', () => {
   });
 
   it('should handle resize config updates', () => {
-    const { result } = renderHook(() => useImageConverter());
+    const { result } = renderHook(() => useImageConverter(), { wrapper });
 
     const newConfig = {
       enabled: true,
@@ -103,7 +122,7 @@ describe('useImageConverter', () => {
   });
 
   it('should determine batch mode correctly', () => {
-    const { result } = renderHook(() => useImageConverter());
+    const { result } = renderHook(() => useImageConverter(), { wrapper });
 
     // Single file - not batch mode
     act(() => {
@@ -124,7 +143,7 @@ describe('useImageConverter', () => {
   });
 
   it('should persist settings to localStorage', () => {
-    const { result } = renderHook(() => useImageConverter());
+    const { result } = renderHook(() => useImageConverter(), { wrapper });
 
     act(() => {
       result.current.setTargetFormat('png');
@@ -156,7 +175,7 @@ describe('useImageConverter', () => {
       },
     }));
 
-    const { result } = renderHook(() => useImageConverter());
+    const { result } = renderHook(() => useImageConverter(), { wrapper });
 
     expect(result.current.targetFormat).toBe('jpeg');
     expect(result.current.quality).toBe(0.7);
