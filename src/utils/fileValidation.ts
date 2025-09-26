@@ -2,18 +2,15 @@
  * Enhanced file validation utilities for security
  */
 
+import { APP_CONSTANTS, FORMAT_CONSTANTS } from '../constants';
+
 // Allowed image formats
-export const ALLOWED_IMAGE_TYPES = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/webp'
-] as const;
+export const ALLOWED_IMAGE_TYPES = FORMAT_CONSTANTS.SUPPORTED_MIME_TYPES;
 
 // File size limits
 export const MAX_FILE_SIZE_MB = 50;
 export const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
-export const MAX_FILES_COUNT = 100;
+export const MAX_FILES_COUNT = APP_CONSTANTS.MAX_FILES_COUNT;
 
 // File signature validation (magic numbers)
 const FILE_SIGNATURES = {
@@ -100,7 +97,7 @@ export const sanitizeFileName = (fileName: string): string => {
  */
 export const validateFileExtension = (fileName: string): boolean => {
   const extension = fileName.toLowerCase().split('.').pop();
-  const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+  const allowedExtensions = FORMAT_CONSTANTS.SUPPORTED_EXTENSIONS;
   return allowedExtensions.includes(extension || '');
 };
 

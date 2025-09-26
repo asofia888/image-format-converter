@@ -63,7 +63,7 @@ const FormatQualityControls: React.FC<FormatQualityControlsProps> = ({
         <div className="flex-1">
           <div className="mb-2">
             <label htmlFor="quality-slider" className="block text-sm font-medium text-slate-600 dark:text-slate-400">
-              {t('qualityLabel')} <span className="text-xs text-slate-500">({Math.round(quality * 100)}%)</span>
+              {t('qualityLabel')} <span className="text-xs text-slate-500">({Math.round(quality * APP_CONSTANTS.PERCENTAGE_MULTIPLIER)}%)</span>
             </label>
             <p className="text-xs text-slate-500">{t('qualityDescription')}</p>
           </div>

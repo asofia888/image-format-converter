@@ -5,9 +5,11 @@ import ImageComparator from './ImageComparator';
 import ConversionControls from './ConversionControls';
 import EditableFileName from './EditableFileName';
 import Icon from './Icon';
+import ProgressBar from './ui/ProgressBar';
 import { useTranslation } from '../hooks/useTranslation';
 import { useImageConverter } from '../hooks/useImageConverter';
 import { formatBytes } from '../utils/formatBytes';
+import { calculateCompressionRatio } from '../utils/percentage';
 
 const ImageConverter: React.FC = () => {
   const { t } = useTranslation();
@@ -96,19 +98,12 @@ const ImageConverter: React.FC = () => {
                       {t('progressText', { convertedCount: convertedCount, totalFiles: files.length })}
                     </span>
                   </div>
-                  <div 
-                    className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5"
-                    role="progressbar"
-                    aria-labelledby="progress-label"
-                    aria-valuenow={files.length > 0 ? Math.round((convertedCount / files.length) * 100) : 0}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                  >
-                    <div 
-                      className="bg-purple-600 dark:bg-purple-500 h-2.5 rounded-full transition-all duration-300" 
-                      style={{ width: `${files.length > 0 ? (convertedCount / files.length) * 100 : 0}%` }}
-                    ></div>
-                  </div>
+                  <ProgressBar
+                    value={convertedCount}
+                    max={files.length}
+                    size="md"
+                    color="purple"
+                  />
                 </div>
               )}
               <div className="max-h-80 overflow-y-auto pr-2">
@@ -137,7 +132,7 @@ const ImageConverter: React.FC = () => {
                                             <span className="text-slate-600 dark:text-slate-300 font-medium">{formatBytes(file.convertedSize)}</span>
                                             {file.convertedSize < file.originalSize && (
                                                 <span className="text-green-500 dark:text-green-400 font-semibold">
-                                                    ({(((file.originalSize - file.convertedSize) / file.originalSize) * 100).toFixed(0)}% smaller)
+                                                    ({calculateCompressionRatio(file.originalSize, file.convertedSize)}% smaller)
                                                 </span>
                                             )}
                                         </>

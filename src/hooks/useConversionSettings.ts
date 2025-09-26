@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
 import type { TargetFormat, ResizeConfig } from '../types';
-
-const SETTINGS_KEY = 'imageConverterSettings';
+import { APP_CONSTANTS, FORMAT_CONSTANTS } from '../constants';
 
 
 // Helper to get initial state from localStorage or set defaults
 const getInitialSettings = () => {
   const defaults = {
     targetFormat: 'webp' as TargetFormat,
-    quality: 0.9,
+    quality: APP_CONSTANTS.DEFAULT_QUALITY,
     resizeConfig: {
       enabled: false,
       width: '',
@@ -19,13 +18,13 @@ const getInitialSettings = () => {
   };
 
   try {
-    const item = window.localStorage.getItem(SETTINGS_KEY);
+    const item = window.localStorage.getItem(APP_CONSTANTS.STORAGE_KEYS.CONVERSION_SETTINGS);
     if (item) {
       const parsed = JSON.parse(item);
       const resizeConfig = { ...defaults.resizeConfig, ...parsed.resizeConfig };
       return {
-        targetFormat: ['webp', 'jpeg', 'png'].includes(parsed.targetFormat) ? parsed.targetFormat : defaults.targetFormat,
-        quality: (typeof parsed.quality === 'number' && parsed.quality >= 0.5 && parsed.quality <= 0.99) ? parsed.quality : defaults.quality,
+        targetFormat: FORMAT_CONSTANTS.SUPPORTED_FORMATS.includes(parsed.targetFormat) ? parsed.targetFormat : defaults.targetFormat,
+        quality: (typeof parsed.quality === 'number' && parsed.quality >= APP_CONSTANTS.MIN_QUALITY && parsed.quality <= APP_CONSTANTS.MAX_QUALITY) ? parsed.quality : defaults.quality,
         resizeConfig,
       };
     }
@@ -50,7 +49,7 @@ export const useConversionSettings = () => {
         quality,
         resizeConfig,
       };
-      window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+      window.localStorage.setItem(APP_CONSTANTS.STORAGE_KEYS.CONVERSION_SETTINGS, JSON.stringify(settings));
     } catch (error) {
       console.error("Error saving settings to localStorage", error);
     }
