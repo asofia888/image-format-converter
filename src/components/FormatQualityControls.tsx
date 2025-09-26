@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
 import type { TargetFormat } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
+import { APP_CONSTANTS } from '../constants';
 
 interface FormatQualityControlsProps {
   targetFormat: TargetFormat;

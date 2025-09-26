@@ -98,7 +98,7 @@ export const sanitizeFileName = (fileName: string): string => {
 export const validateFileExtension = (fileName: string): boolean => {
   const extension = fileName.toLowerCase().split('.').pop();
   const allowedExtensions = FORMAT_CONSTANTS.SUPPORTED_EXTENSIONS;
-  return allowedExtensions.includes(extension || '');
+  return allowedExtensions.includes(extension as any);
 };
 
 /**
