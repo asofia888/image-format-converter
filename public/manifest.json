@@ -1,7 +1,7 @@
 {
-  "name": "Image Format Converter",
-  "short_name": "ImageConverter",
-  "description": "Convert images between different formats quickly and easily",
+  "name": "WebP Magic",
+  "short_name": "WebP Magic",
+  "description": "Transform your JPEG, PNG, and WebP images like magic using your browser",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f172a",
@@ -64,7 +64,7 @@
     {
       "name": "Convert Image",
       "short_name": "Convert",
-      "description": "Quickly convert an image",
+      "description": "Transform an image like magic",
       "url": "/?action=convert",
       "icons": [
         {
@@ -80,14 +80,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "Convert images between formats"
+      "label": "Transform images like magic"
     },
     {
       "src": "/screenshots/mobile-1.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "Mobile image converter"
+      "label": "Mobile WebP Magic"
     }
   ],
   "related_applications": [],
