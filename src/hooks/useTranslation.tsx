@@ -77,7 +77,7 @@ const en = {
 const ja = {
   "_version": "7251664_webp_magic_2025",
   "appTitle": "WebP Magic",
-  "appDescription": "ブラウザでJPEG、PNG、WebP画像を魔法のように変換。";
+  "appDescription": "ブラウザでJPEG、PNG、WebP画像を魔法のように変換。",
   "footerText": "&copy; {year} WebP Magic. All rights reserved.",
   "footerTerms": "利用規約",
   "footerDisclaimer": "免責事項",
