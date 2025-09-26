@@ -21,14 +21,13 @@ const FormatQualityControls: React.FC<FormatQualityControlsProps> = ({
     { value: 'jpeg', label: 'JPEG' },
     { value: 'png', label: 'PNG' },
     { value: 'webp', label: 'WebP' },
-    { value: 'avif', label: 'AVIF' },
   ], []);
 
   const formatOptions = useMemo(() => {
     return allFormatOptions;
   }, [allFormatOptions]);
 
-  const showQualitySlider = useMemo(() => targetFormat === 'jpeg' || targetFormat === 'webp' || targetFormat === 'avif', [targetFormat]);
+  const showQualitySlider = useMemo(() => targetFormat === 'jpeg' || targetFormat === 'webp', [targetFormat]);
 
   const handleFormatChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
     setTargetFormat(e.target.value as TargetFormat);

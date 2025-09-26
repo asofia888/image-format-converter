@@ -1,7 +1,7 @@
 // FIX: Import TranslationKeys to use for error messages.
 import type { TranslationKeys } from './hooks/useTranslation';
 
-export type TargetFormat = 'webp' | 'jpeg' | 'png' | 'avif';
+export type TargetFormat = 'webp' | 'jpeg' | 'png';
 
 export type AppStatus = 'idle' | 'loading' | 'success' | 'error' | 'converting';
 

@@ -3,15 +3,6 @@ import type { TargetFormat, ResizeConfig } from '../types';
 
 const SETTINGS_KEY = 'imageConverterSettings';
 
-// Helper to get default quality based on format
-const getDefaultQuality = (format: TargetFormat): number => {
-  switch (format) {
-    case 'avif':
-      return 0.5;
-    default:
-      return 0.9;
-  }
-};
 
 // Helper to get initial state from localStorage or set defaults
 const getInitialSettings = () => {
@@ -33,7 +24,7 @@ const getInitialSettings = () => {
       const parsed = JSON.parse(item);
       const resizeConfig = { ...defaults.resizeConfig, ...parsed.resizeConfig };
       return {
-        targetFormat: ['webp', 'jpeg', 'png', 'avif'].includes(parsed.targetFormat) ? parsed.targetFormat : defaults.targetFormat,
+        targetFormat: ['webp', 'jpeg', 'png'].includes(parsed.targetFormat) ? parsed.targetFormat : defaults.targetFormat,
         quality: (typeof parsed.quality === 'number' && parsed.quality >= 0.5 && parsed.quality <= 0.99) ? parsed.quality : defaults.quality,
         resizeConfig,
       };
@@ -74,16 +65,11 @@ export const useConversionSettings = () => {
     }));
   };
 
-  const setTargetFormatWithQuality = (format: TargetFormat) => {
-    setTargetFormat(format);
-    setQuality(getDefaultQuality(format));
-  };
-
   return {
     targetFormat,
     quality,
     resizeConfig,
-    setTargetFormat: setTargetFormatWithQuality,
+    setTargetFormat,
     setQuality,
     setResizeConfig,
     resetResizeConfig,
