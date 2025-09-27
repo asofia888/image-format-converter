@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://image-format-converter-eight.vercel.app/</loc>
+    <lastmod>2025-01-27</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://image-format-converter-eight.vercel.app/icons/icon-512x512.png</image:loc>
+      <image:title>WebP Magic - プライバシー保護の画像変換ツール</image:title>
+      <image:caption>JPEG、PNG、WebPを安全にブラウザ内で変換</image:caption>
+    </image:image>
+  </url>
+</urlset>

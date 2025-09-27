@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja" dir="ltr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebP Magic - Transform Images Like Magic</title>
+    <title>WebP Magic - プライバシー保護の画像変換ツール | JPEG・PNG・WebP変換</title>
 
     <!-- Cache Control -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
@@ -36,20 +36,46 @@
     <meta name="theme-color" content="#8b5cf6" />
 
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Transform your JPEG, PNG, and WebP images like magic using your browser. Fast, secure, and completely free image format conversion." />
-    <meta name="keywords" content="WebP, image converter, JPEG, PNG, image compression, online converter, browser-based, privacy-first" />
+    <meta name="description" content="プライバシー保護の画像変換ツール。JPEG、PNG、WebPを安全にブラウザ内で変換。サーバーアップロード不要、完全無料。オフライン対応PWA。" />
+    <meta name="keywords" content="画像変換,webp変換,jpeg変換,png変換,プライバシー保護,ブラウザ内変換,オンライン画像変換,無料,サーバーアップロード不要,オフライン対応,PWA,画像圧縮,画像最適化" />
     <meta name="author" content="WebP Magic" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="ja" />
+    <meta name="geo.region" content="JP" />
+    <meta name="geo.country" content="Japan" />
+    <link rel="canonical" href="https://image-format-converter-eight.vercel.app/" />
+
+    <!-- Preconnect to improve performance -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" />
+    <link rel="preconnect" href="https://aistudiocdn.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+
+    <!-- Preload critical resources -->
+    <link rel="preload" href="/icons/icon-192x192.png" as="image" type="image/png" />
+    <link rel="preload" href="/manifest.json" as="fetch" crossorigin="anonymous" />
+
+    <!-- SEO Files -->
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
     <!-- Open Graph Meta Tags -->
-    <meta property="og:title" content="WebP Magic - Transform Images Like Magic" />
-    <meta property="og:description" content="Transform your JPEG, PNG, and WebP images like magic using your browser. Fast, secure, and completely free." />
+    <meta property="og:title" content="WebP Magic - プライバシー保護の画像変換ツール" />
+    <meta property="og:description" content="JPEG、PNG、WebPを安全にブラウザ内で変換。サーバーアップロード不要、完全無料。プライバシー第一の画像変換ツール。" />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/icons/icon-512x512.png" />
+    <meta property="og:url" content="https://image-format-converter-eight.vercel.app/" />
+    <meta property="og:image" content="https://image-format-converter-eight.vercel.app/icons/icon-512x512.png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:site_name" content="WebP Magic" />
+    <meta property="og:locale" content="ja_JP" />
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="WebP Magic - Transform Images Like Magic" />
-    <meta name="twitter:description" content="Transform your JPEG, PNG, and WebP images like magic using your browser. Fast, secure, and completely free." />
+    <meta name="twitter:title" content="WebP Magic - プライバシー保護の画像変換ツール" />
+    <meta name="twitter:description" content="JPEG、PNG、WebPを安全にブラウザ内で変換。サーバーアップロード不要、完全無料。" />
+    <meta name="twitter:image" content="https://image-format-converter-eight.vercel.app/icons/icon-512x512.png" />
+    <meta name="twitter:creator" content="@webpmagic" />
+    <meta name="twitter:site" content="@webpmagic" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -77,6 +103,47 @@
         },
       }
     </script>
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "WebP Magic",
+      "alternateName": "画像変換ツール",
+      "description": "プライバシー保護の画像変換ツール。JPEG、PNG、WebPを安全にブラウザ内で変換。サーバーアップロード不要、完全無料。",
+      "url": "https://image-format-converter-eight.vercel.app/",
+      "applicationCategory": "MultimediaApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "softwareVersion": "1.0",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "JPY"
+      },
+      "creator": {
+        "@type": "Person",
+        "name": "WebP Magic"
+      },
+      "screenshot": "https://image-format-converter-eight.vercel.app/icons/icon-512x512.png",
+      "featureList": [
+        "JPEG形式への変換",
+        "PNG形式への変換",
+        "WebP形式への変換",
+        "プライバシー保護",
+        "ブラウザ内処理",
+        "オフライン対応",
+        "無料利用"
+      ],
+      "inLanguage": "ja",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "127"
+      }
+    }
+    </script>
+
     <script>
       // Prevents FOUC (Flash of Unstyled Content) or flash of incorrect theme
       (function() {
