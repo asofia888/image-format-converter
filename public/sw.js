@@ -157,10 +157,14 @@ async function staleWhileRevalidate(request) {
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
+    return;
   }
 
   if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({ version: CACHE_NAME });
+    if (event.ports && event.ports[0]) {
+      event.ports[0].postMessage({ version: CACHE_NAME });
+    }
+    return;
   }
 
   if (event.data && event.data.type === 'CLEAR_CACHE') {
@@ -171,6 +175,7 @@ self.addEventListener('message', (event) => {
         );
       })
     );
+    return;
   }
 });
 
