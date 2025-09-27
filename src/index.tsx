@@ -95,3 +95,54 @@ if ('serviceWorker' in navigator) {
     });
   });
 }
+
+// Handle PWA install prompt
+let deferredPrompt: any;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  console.log('beforeinstallprompt fired');
+  // Prevent the mini-infobar from appearing on mobile
+  e.preventDefault();
+  // Stash the event so it can be triggered later
+  deferredPrompt = e;
+
+  // Update UI to notify the user they can install the PWA
+  const installButton = document.querySelector('#install-button') as HTMLElement;
+  if (installButton) {
+    installButton.style.display = 'block';
+  }
+
+  // Dispatch a custom event to notify components
+  window.dispatchEvent(new CustomEvent('pwa-installable'));
+});
+
+window.addEventListener('appinstalled', () => {
+  console.log('PWA was installed');
+  // Clear the deferredPrompt so it can be garbage collected
+  deferredPrompt = null;
+
+  // Hide the install button
+  const installButton = document.querySelector('#install-button') as HTMLElement;
+  if (installButton) {
+    installButton.style.display = 'none';
+  }
+
+  // Dispatch a custom event to notify components
+  window.dispatchEvent(new CustomEvent('pwa-installed'));
+});
+
+// Export function to trigger install
+(window as any).triggerInstall = () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+
+    deferredPrompt.userChoice.then((choiceResult: any) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      deferredPrompt = null;
+    });
+  }
+};

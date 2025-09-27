@@ -4,6 +4,7 @@
   "description": "Transform your JPEG, PNG, and WebP images like magic using your browser",
   "start_url": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "background_color": "#0f172a",
   "theme_color": "#8b5cf6",
   "orientation": "portrait-primary",
