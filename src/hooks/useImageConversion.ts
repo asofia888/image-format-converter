@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import JSZip from 'jszip';
 import type { TargetFormat, AppStatus, ProcessedFile, ResizeConfig, CropConfig } from '../types';
 import type { TranslationKeys } from './useTranslation';
 
@@ -136,14 +135,17 @@ export const useImageConversion = ({
   }, [targetFormat]);
 
   const handleDownloadZip = useCallback(async () => {
-    const zip = new JSZip();
-    files.forEach(file => {
-        if (file.status === 'success' && file.convertedBlob) {
-            zip.file(getConvertedFileName(file.file, file.customName), file.convertedBlob);
-        }
-    });
-
     try {
+        // Dynamically import JSZip only when needed
+        const { default: JSZip } = await import('jszip');
+
+        const zip = new JSZip();
+        files.forEach(file => {
+            if (file.status === 'success' && file.convertedBlob) {
+                zip.file(getConvertedFileName(file.file, file.customName), file.convertedBlob);
+            }
+        });
+
         const content = await zip.generateAsync({ type: 'blob' });
         const fileName = `converted_images_${Date.now()}.zip`;
 
@@ -181,7 +183,7 @@ export const useImageConversion = ({
     } catch (e) {
         setError({ key: 'errorCreateZip' });
         setLiveRegionMessage(t('errorCreateZip'));
-        console.error(e);
+        console.error('Error creating ZIP or loading JSZip:', e);
     }
   }, [files, getConvertedFileName, setError, t]);
 
