@@ -15,6 +15,14 @@ export interface ResizeConfig {
   maintainAspectRatio: boolean;
 }
 
+export interface CropConfig {
+  enabled: boolean;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface Preset {
   id: string;
   name: string;
@@ -22,6 +30,7 @@ export interface Preset {
     targetFormat: TargetFormat;
     quality: number;
     resizeConfig: ResizeConfig;
+    cropConfig: CropConfig;
   };
 }
 

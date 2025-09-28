@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import JSZip from 'jszip';
-import type { TargetFormat, AppStatus, ProcessedFile, ResizeConfig } from '../types';
+import type { TargetFormat, AppStatus, ProcessedFile, ResizeConfig, CropConfig } from '../types';
 import type { TranslationKeys } from './useTranslation';
 
 interface UseImageConversionProps {
@@ -8,6 +8,7 @@ interface UseImageConversionProps {
   targetFormat: TargetFormat;
   quality: number;
   resizeConfig: ResizeConfig;
+  cropConfig: CropConfig;
   setAppStatus: (status: AppStatus) => void;
   setError: (error: { key: TranslationKeys; params?: Record<string, string | number> } | null) => void;
   updateFileStatus: (fileId: string, status: ProcessedFile['status'], error?: { key: TranslationKeys; params?: Record<string, string | number> }) => void;
@@ -21,6 +22,7 @@ export const useImageConversion = ({
   targetFormat,
   quality,
   resizeConfig,
+  cropConfig,
   setAppStatus,
   setError,
   updateFileStatus,
@@ -75,6 +77,7 @@ export const useImageConversion = ({
             quality: quality,
             fileType: file.type,
             resizeConfig: resizeConfig,
+            cropConfig: cropConfig,
             originalWidth: fileToProcess.originalWidth,
             originalHeight: fileToProcess.originalHeight,
           },
@@ -86,7 +89,7 @@ export const useImageConversion = ({
         worker.terminate();
       }
     });
-  }, [targetFormat, quality, updateFileStatus, resizeConfig]);
+  }, [targetFormat, quality, updateFileStatus, resizeConfig, cropConfig]);
 
   const handleConvert = useCallback(async () => {
     const filesToProcess = files.filter(f => f.status === 'pending');

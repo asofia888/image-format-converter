@@ -1,7 +1,7 @@
 // This worker handles the image conversion in a background thread
 // to avoid blocking the UI.
 // FIX: Import ResizeConfig and TargetFormat from '../types' in a single statement.
-import type { ResizeConfig, TargetFormat } from '../types';
+import type { ResizeConfig, TargetFormat, CropConfig } from '../types';
 
 
 self.onmessage = async (e: MessageEvent) => {
@@ -11,6 +11,7 @@ self.onmessage = async (e: MessageEvent) => {
     quality,
     fileType,
     resizeConfig,
+    cropConfig,
     originalWidth,
     originalHeight,
   } = e.data as {
@@ -19,24 +20,41 @@ self.onmessage = async (e: MessageEvent) => {
     quality: number;
     fileType: string;
     resizeConfig: ResizeConfig;
+    cropConfig: CropConfig;
     originalWidth: number;
     originalHeight: number;
   };
 
   try {
-    let targetWidth = originalWidth;
-    let targetHeight = originalHeight;
+    // Determine source dimensions and coordinates for cropping
+    let srcX = 0;
+    let srcY = 0;
+    let srcWidth = originalWidth;
+    let srcHeight = originalHeight;
 
+    // Apply cropping if enabled
+    if (cropConfig.enabled && cropConfig.width > 0 && cropConfig.height > 0) {
+      srcX = Math.max(0, Math.min(cropConfig.x, originalWidth));
+      srcY = Math.max(0, Math.min(cropConfig.y, originalHeight));
+      srcWidth = Math.max(1, Math.min(cropConfig.width, originalWidth - srcX));
+      srcHeight = Math.max(1, Math.min(cropConfig.height, originalHeight - srcY));
+    }
+
+    // Determine target dimensions (start with crop dimensions)
+    let targetWidth = srcWidth;
+    let targetHeight = srcHeight;
+
+    // Apply resizing if enabled (after cropping)
     if (resizeConfig.enabled) {
       const widthNum = parseInt(resizeConfig.width, 10);
       const heightNum = parseInt(resizeConfig.height, 10);
 
       if (resizeConfig.unit === 'px') {
-        targetWidth = isNaN(widthNum) ? originalWidth : widthNum;
-        targetHeight = isNaN(heightNum) ? originalHeight : heightNum;
+        targetWidth = isNaN(widthNum) ? srcWidth : widthNum;
+        targetHeight = isNaN(heightNum) ? srcHeight : heightNum;
       } else { // '%'
-        targetWidth = isNaN(widthNum) ? originalWidth : originalWidth * (widthNum / 100);
-        targetHeight = isNaN(heightNum) ? originalHeight : originalHeight * (heightNum / 100);
+        targetWidth = isNaN(widthNum) ? srcWidth : srcWidth * (widthNum / 100);
+        targetHeight = isNaN(heightNum) ? srcHeight : srcHeight * (heightNum / 100);
       }
     }
 
@@ -62,8 +80,12 @@ self.onmessage = async (e: MessageEvent) => {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Draw the image data onto the canvas, resizing it in the process
-    ctx.drawImage(imageData, 0, 0, targetWidth, targetHeight);
+    // Draw the image data onto the canvas, applying crop and resize in one operation
+    ctx.drawImage(
+      imageData,
+      srcX, srcY, srcWidth, srcHeight,  // Source rectangle (crop area)
+      0, 0, targetWidth, targetHeight   // Destination rectangle (resize)
+    );
     imageData.close(); // Close the ImageBitmap to free up memory
 
     // Convert the canvas content to a Blob in the target format.

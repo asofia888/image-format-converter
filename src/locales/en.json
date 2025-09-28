@@ -49,6 +49,8 @@
   "originalDimensionsLabel": "Current: {width} x {height}px",
   "editToolsLabel": "Edit Tools",
   "cropButton": "Crop",
+  "cropModalTitle": "Crop Image",
+  "applyCropButton": "Apply Crop",
   "resetCropButton": "Reset Crop",
   "cropModalTitle": "Crop Image",
   "applyCropButton": "Apply Crop",

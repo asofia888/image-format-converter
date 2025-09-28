@@ -29,10 +29,13 @@ export const useImageConverter = () => {
     targetFormat,
     quality,
     resizeConfig,
+    cropConfig,
     setTargetFormat,
     setQuality,
     setResizeConfig,
-    resetResizeConfig
+    setCropConfig,
+    resetResizeConfig,
+    resetCropConfig
   } = useConversionSettings();
 
   const {
@@ -45,10 +48,12 @@ export const useImageConverter = () => {
     targetFormat,
     quality,
     resizeConfig,
+    cropConfig,
     files,
     setTargetFormat,
     setQuality,
     setResizeConfig,
+    setCropConfig,
     setLiveRegionMessage
   });
 
@@ -62,6 +67,7 @@ export const useImageConverter = () => {
     targetFormat,
     quality,
     resizeConfig,
+    cropConfig,
     setAppStatus,
     setError,
     updateFileStatus,
@@ -77,7 +83,8 @@ export const useImageConverter = () => {
     resetFileState();
     setLiveRegionMessage('');
     resetResizeConfig();
-  }, [resetFileState, resetResizeConfig]);
+    resetCropConfig();
+  }, [resetFileState, resetResizeConfig, resetCropConfig]);
 
   const handleSavePreset = useCallback((name: string): boolean => {
       setError(null);
@@ -109,9 +116,11 @@ export const useImageConverter = () => {
     isDownloadReady,
     isConverting,
     resizeConfig,
+    cropConfig,
     presets,
     activePresetId,
     setResizeConfig,
+    setCropConfig,
     handleFilesSelect,
     setTargetFormat,
     setQuality,
