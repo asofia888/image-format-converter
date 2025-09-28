@@ -79,7 +79,7 @@ const ImageConverter: React.FC = () => {
                 afterFileName={files[0].convertedSrc ? getConvertedFileName(files[0].file, files[0].customName) : undefined}
                 beforeFileSize={files[0].originalSize}
                 afterFileSize={files[0].convertedSize}
-                dimensions={{ width: files[0].originalWidth, height: files[0].originalHeight }}
+                dimensions={{ width: files[0].trueOriginalWidth, height: files[0].trueOriginalHeight }}
                 isLoading={files[0].status === 'converting'}
                 error={files[0].error ? t(files[0].error.key, files[0].error.params) : null}
                 customFileName={files[0].customName}
@@ -125,7 +125,7 @@ const ImageConverter: React.FC = () => {
                                     className="mb-1"
                                   />
                                   <div className="flex items-center gap-1.5 text-xs">
-                                    <span className="text-slate-500 dark:text-slate-400">{formatBytes(file.originalSize)}{file.originalWidth > 0 && ` (${file.originalWidth}x${file.originalHeight})`}</span>
+                                    <span className="text-slate-500 dark:text-slate-400">{formatBytes(file.originalSize)}{file.trueOriginalWidth > 0 && ` (${file.trueOriginalWidth}x${file.trueOriginalHeight})`}</span>
                                     {file.status === 'success' && file.convertedSize != null && (
                                         <>
                                             <Icon name="arrowRightSmall" className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500"/>
@@ -176,7 +176,7 @@ const ImageConverter: React.FC = () => {
                 convertedFileName={!isBatchMode && files[0] ? getConvertedFileName(files[0].file, files[0].customName) : ''}
                 resizeConfig={resizeConfig}
                 setResizeConfig={setResizeConfig}
-                originalDimensions={!isBatchMode && files[0] ? { width: files[0].originalWidth, height: files[0].originalHeight } : null}
+                originalDimensions={!isBatchMode && files[0] ? { width: files[0].trueOriginalWidth, height: files[0].trueOriginalHeight } : null}
                 presets={presets}
                 activePresetId={activePresetId}
                 onSavePreset={handleSavePreset}
