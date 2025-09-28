@@ -6,6 +6,94 @@ const PRESETS_KEY = 'imageConverterPresets';
 
 const defaultPresets: Preset[] = [
   {
+    id: 'instagram_post',
+    name: 'Instagram投稿 (1080x1080)',
+    settings: {
+      targetFormat: 'jpeg',
+      quality: 0.9,
+      resizeConfig: {
+        enabled: true,
+        width: '1080',
+        height: '1080',
+        unit: 'px',
+        maintainAspectRatio: false,
+      },
+      cropConfig: {
+        enabled: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      },
+    },
+  },
+  {
+    id: 'twitter_post',
+    name: 'Twitter投稿 (1200x675)',
+    settings: {
+      targetFormat: 'jpeg',
+      quality: 0.9,
+      resizeConfig: {
+        enabled: true,
+        width: '1200',
+        height: '675',
+        unit: 'px',
+        maintainAspectRatio: false,
+      },
+      cropConfig: {
+        enabled: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      },
+    },
+  },
+  {
+    id: 'tiktok_post',
+    name: 'TikTok投稿 (1080x1920)',
+    settings: {
+      targetFormat: 'jpeg',
+      quality: 0.9,
+      resizeConfig: {
+        enabled: true,
+        width: '1080',
+        height: '1920',
+        unit: 'px',
+        maintainAspectRatio: false,
+      },
+      cropConfig: {
+        enabled: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      },
+    },
+  },
+  {
+    id: 'custom',
+    name: 'カスタム',
+    settings: {
+      targetFormat: 'jpeg',
+      quality: 0.9,
+      resizeConfig: {
+        enabled: false,
+        width: '',
+        height: '',
+        unit: 'px',
+        maintainAspectRatio: true,
+      },
+      cropConfig: {
+        enabled: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      },
+    },
+  },
+  {
     id: 'default_blog',
     name: 'Blog Post (1200px WebP)',
     settings: {

@@ -72,9 +72,32 @@ const PresetControls: React.FC<PresetControlsProps> = ({
             className="flex-1 w-full bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm text-slate-900 dark:text-white"
           >
             <option value="">{t('customSettingsOption')}</option>
-            {presets.map(preset => (
-              <option key={preset.id} value={preset.id}>{preset.name}</option>
-            ))}
+
+            <optgroup label="ソーシャルメディア">
+              {presets.filter(preset => ['instagram_post', 'twitter_post', 'tiktok_post'].includes(preset.id)).map(preset => (
+                <option key={preset.id} value={preset.id}>{preset.name}</option>
+              ))}
+            </optgroup>
+
+            <optgroup label="カスタム">
+              {presets.filter(preset => preset.id === 'custom').map(preset => (
+                <option key={preset.id} value={preset.id}>{preset.name}</option>
+              ))}
+            </optgroup>
+
+            <optgroup label="一般">
+              {presets.filter(preset => !['instagram_post', 'twitter_post', 'tiktok_post', 'custom'].includes(preset.id) && !preset.id.startsWith('custom_')).map(preset => (
+                <option key={preset.id} value={preset.id}>{preset.name}</option>
+              ))}
+            </optgroup>
+
+            {presets.some(preset => preset.id.startsWith('custom_')) && (
+              <optgroup label="保存済みプリセット">
+                {presets.filter(preset => preset.id.startsWith('custom_')).map(preset => (
+                  <option key={preset.id} value={preset.id}>{preset.name}</option>
+                ))}
+              </optgroup>
+            )}
           </select>
           <button
             onClick={handleDeleteClick}
