@@ -42,6 +42,7 @@ const ImageConverter: React.FC = () => {
     handleDeletePreset,
     handleFileNameChange,
     handleRemoveFile,
+    handleApplyCrop,
   } = useImageConverter();
 
   const statusIconMap = useMemo(() => ({
@@ -73,7 +74,7 @@ const ImageConverter: React.FC = () => {
           {/* Single File View */}
           {!isBatchMode && files[0] && (
              <ImageComparator
-                beforeSrc={files[0].originalSrc}
+                beforeSrc={files[0].croppedSrc || files[0].originalSrc}
                 afterSrc={files[0].convertedSrc}
                 beforeLabel={t('originalLabel')}
                 afterLabel={t('convertedLabel')}
@@ -182,6 +183,7 @@ const ImageConverter: React.FC = () => {
                 cropConfig={cropConfig}
                 setCropConfig={setCropConfig}
                 originalDimensions={!isBatchMode && files[0] ? { width: files[0].trueOriginalWidth, height: files[0].trueOriginalHeight } : null}
+                onApplyCrop={handleApplyCrop}
                 presets={presets}
                 activePresetId={activePresetId}
                 onSavePreset={handleSavePreset}

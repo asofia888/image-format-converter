@@ -8,7 +8,8 @@ interface CropControlsProps {
   setCropConfig: React.Dispatch<React.SetStateAction<CropConfig>>;
   originalDimensions: { width: number; height: number } | null;
   imageSrc: string | null;
-  onCropModalOpen?: () => void;
+  onApplyCrop?: () => void;
+  applyCropDisabled?: boolean;
 }
 
 interface CropSelection {
@@ -24,6 +25,8 @@ const CropControls: React.FC<CropControlsProps> = ({
   setCropConfig,
   originalDimensions,
   imageSrc,
+  onApplyCrop,
+  applyCropDisabled = false,
 }) => {
   const { t } = useTranslation();
   const [selection, setSelection] = useState<CropSelection>({
@@ -285,6 +288,25 @@ const CropControls: React.FC<CropControlsProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Apply Crop Button */}
+            {hasCropData && onApplyCrop && (
+              <button
+                onClick={onApplyCrop}
+                disabled={applyCropDisabled || !cropConfig.enabled}
+                className={`
+                  w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
+                  focus:outline-none focus:ring-2 focus:ring-purple-500
+                  ${!applyCropDisabled && cropConfig.enabled
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-md hover:shadow-lg'
+                    : 'bg-slate-300 dark:bg-slate-600 text-slate-500 dark:text-slate-400 cursor-not-allowed'
+                  }
+                `}
+              >
+                <Icon name="crop" className="w-4 h-4" />
+                {applyCropDisabled ? 'Processing...' : t('applyCropButton')}
+              </button>
+            )}
           </div>
         ) : (
           <div className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">

@@ -44,6 +44,9 @@ export interface ProcessedFile {
   originalHeight: number;
   trueOriginalWidth: number;
   trueOriginalHeight: number;
+  croppedSrc: string | null; // Source after cropping but before conversion
+  croppedWidth: number;
+  croppedHeight: number;
   convertedSrc: string | null;
   convertedBlob: Blob | null;
   convertedSize: number | null;

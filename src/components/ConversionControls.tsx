@@ -26,6 +26,7 @@ interface ConversionControlsProps {
   cropConfig: CropConfig;
   setCropConfig: React.Dispatch<React.SetStateAction<CropConfig>>;
   originalDimensions: { width: number; height: number } | null;
+  onApplyCrop: () => void;
   presets: Preset[];
   activePresetId: string;
   onSavePreset: (name: string) => boolean;
@@ -53,6 +54,7 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
   cropConfig,
   setCropConfig,
   originalDimensions,
+  onApplyCrop,
   presets,
   activePresetId,
   onSavePreset,
@@ -95,6 +97,8 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
         setCropConfig={setCropConfig}
         originalDimensions={originalDimensions}
         imageSrc={originalImageSrc}
+        onApplyCrop={onApplyCrop}
+        applyCropDisabled={isConverting}
       />
 
       {/* Action Buttons */}

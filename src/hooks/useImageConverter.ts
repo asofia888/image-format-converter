@@ -4,6 +4,7 @@ import { useFileManager } from './useFileManager';
 import { usePresetManager } from './usePresetManager';
 import { useConversionSettings } from './useConversionSettings';
 import { useImageConversion } from './useImageConversion';
+import { cropImage } from '../utils/cropImage';
 
 export const useImageConverter = () => {
   const [liveRegionMessage, setLiveRegionMessage] = useState('');
@@ -19,6 +20,7 @@ export const useImageConverter = () => {
     setError,
     handleFilesSelect,
     updateFileStatus,
+    updateFileCrop,
     updateFileConversion,
     handleFileNameChange,
     handleRemoveFile,
@@ -104,6 +106,31 @@ export const useImageConverter = () => {
   const isDownloadReady = useMemo(() => files.length > 0 && files.every(f => f.status === 'success' || f.status === 'error'), [files]);
   const isConverting = useMemo(() => appStatus === 'converting', [appStatus]);
 
+  const handleApplyCrop = useCallback(async () => {
+    if (!files[0] || !cropConfig.enabled || cropConfig.width === 0 || cropConfig.height === 0) return;
+
+    const fileToProcess = files[0];
+    setAppStatus('loading');
+
+    try {
+      const sourceSrc = fileToProcess.croppedSrc || fileToProcess.originalSrc;
+      const result = await cropImage(sourceSrc, cropConfig);
+
+      updateFileCrop(
+        fileToProcess.id,
+        result.croppedSrc,
+        result.croppedWidth,
+        result.croppedHeight
+      );
+
+      setAppStatus('idle');
+    } catch (error) {
+      console.error('Crop error:', error);
+      setError({ key: 'errorCrop' });
+      setAppStatus('error');
+    }
+  }, [files, cropConfig, setAppStatus, updateFileCrop, setError]);
+
   return {
     files,
     targetFormat,
@@ -133,5 +160,6 @@ export const useImageConverter = () => {
     handleDeletePreset,
     handleFileNameChange,
     handleRemoveFile,
+    handleApplyCrop,
   };
 };

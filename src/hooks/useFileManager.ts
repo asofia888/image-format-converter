@@ -12,7 +12,7 @@ export const useFileManager = () => {
 
   // Effect to clean up object URLs to prevent memory leaks
   useEffect(() => {
-    const objectUrls = files.flatMap(f => [f.originalSrc, f.convertedSrc]).filter((url): url is string => !!(url && url.startsWith('blob:')));
+    const objectUrls = files.flatMap(f => [f.originalSrc, f.croppedSrc, f.convertedSrc]).filter((url): url is string => !!(url && url.startsWith('blob:')));
 
     // Cleanup function runs when component unmounts or `files` state changes
     return () => {
@@ -29,6 +29,9 @@ export const useFileManager = () => {
     originalHeight: 0,
     trueOriginalWidth: 0,
     trueOriginalHeight: 0,
+    croppedSrc: null,
+    croppedWidth: 0,
+    croppedHeight: 0,
     convertedSrc: null,
     convertedBlob: null,
     convertedSize: null,
@@ -90,6 +93,8 @@ export const useFileManager = () => {
         originalHeight: height,
         trueOriginalWidth: width,
         trueOriginalHeight: height,
+        croppedWidth: width,
+        croppedHeight: height,
         error: null,
       };
     } catch (error) {
@@ -140,6 +145,26 @@ export const useFileManager = () => {
       prevFiles.map(file =>
         file.id === fileId
           ? { ...file, status, error: error || null }
+          : file
+      )
+    );
+  }, []);
+
+  const updateFileCrop = useCallback((fileId: string, croppedSrc: string, croppedWidth: number, croppedHeight: number) => {
+    setFiles(prevFiles =>
+      prevFiles.map(file =>
+        file.id === fileId
+          ? {
+              ...file,
+              croppedSrc,
+              croppedWidth,
+              croppedHeight,
+              // Reset conversion when cropping changes
+              convertedSrc: null,
+              convertedBlob: null,
+              convertedSize: null,
+              error: null
+            }
           : file
       )
     );
@@ -200,6 +225,7 @@ export const useFileManager = () => {
     setError,
     handleFilesSelect,
     updateFileStatus,
+    updateFileCrop,
     updateFileConversion,
     handleFileNameChange,
     handleRemoveFile,

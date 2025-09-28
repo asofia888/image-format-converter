@@ -69,7 +69,19 @@ export const useImageConversion = ({
       };
 
       try {
-        const imageBitmap = await createImageBitmap(file);
+        let imageBitmap: ImageBitmap;
+
+        // Use cropped image if available, otherwise use original file
+        if (fileToProcess.croppedSrc) {
+          // For cropped images, fetch the blob from the cropped source
+          const response = await fetch(fileToProcess.croppedSrc);
+          const blob = await response.blob();
+          imageBitmap = await createImageBitmap(blob);
+        } else {
+          // Use original file
+          imageBitmap = await createImageBitmap(file);
+        }
+
         worker.postMessage(
           {
             imageData: imageBitmap,
@@ -77,9 +89,9 @@ export const useImageConversion = ({
             quality: quality,
             fileType: file.type,
             resizeConfig: resizeConfig,
-            cropConfig: cropConfig,
-            originalWidth: fileToProcess.originalWidth,
-            originalHeight: fileToProcess.originalHeight,
+            cropConfig: { ...cropConfig, enabled: false }, // Disable crop since we're using pre-cropped image
+            originalWidth: fileToProcess.croppedWidth || fileToProcess.originalWidth,
+            originalHeight: fileToProcess.croppedHeight || fileToProcess.originalHeight,
           },
           [imageBitmap]
         );
