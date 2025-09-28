@@ -20,6 +20,14 @@ interface CropSelection {
   isDragging: boolean;
 }
 
+interface PositionDrag {
+  isPositionDragging: boolean;
+  lastMouseX: number;
+  lastMouseY: number;
+  originalCropX: number;
+  originalCropY: number;
+}
+
 const CropControls: React.FC<CropControlsProps> = ({
   cropConfig,
   setCropConfig,
@@ -37,6 +45,13 @@ const CropControls: React.FC<CropControlsProps> = ({
     isDragging: false,
   });
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [positionDrag, setPositionDrag] = useState<PositionDrag>({
+    isPositionDragging: false,
+    lastMouseX: 0,
+    lastMouseY: 0,
+    originalCropX: 0,
+    originalCropY: 0,
+  });
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -176,6 +191,51 @@ const CropControls: React.FC<CropControlsProps> = ({
     };
   }, []);
 
+  // Handle double-click on crop frame to enable position adjustment
+  const handleCropDoubleClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!hasCropData || !imageRef.current) return;
+
+    const coords = getImageCoordinates(e.clientX, e.clientY);
+
+    setPositionDrag({
+      isPositionDragging: true,
+      lastMouseX: coords.x,
+      lastMouseY: coords.y,
+      originalCropX: cropConfig.x,
+      originalCropY: cropConfig.y,
+    });
+  }, [hasCropData, getImageCoordinates, cropConfig.x, cropConfig.y]);
+
+  // Handle position dragging
+  const handlePositionDrag = useCallback((e: React.MouseEvent) => {
+    if (!positionDrag.isPositionDragging || !imageRef.current || !originalDimensions) return;
+
+    const coords = getImageCoordinates(e.clientX, e.clientY);
+    const deltaX = coords.x - positionDrag.lastMouseX;
+    const deltaY = coords.y - positionDrag.lastMouseY;
+
+    const newX = positionDrag.originalCropX + deltaX;
+    const newY = positionDrag.originalCropY + deltaY;
+
+    // Ensure crop stays within image bounds
+    const constrainedX = Math.max(0, Math.min(newX, originalDimensions.width - cropConfig.width));
+    const constrainedY = Math.max(0, Math.min(newY, originalDimensions.height - cropConfig.height));
+
+    setCropConfig(prev => ({
+      ...prev,
+      x: constrainedX,
+      y: constrainedY,
+    }));
+  }, [positionDrag, getImageCoordinates, originalDimensions, cropConfig.width, cropConfig.height, setCropConfig]);
+
+  // Handle position drag end
+  const handlePositionDragEnd = useCallback(() => {
+    setPositionDrag(prev => ({ ...prev, isPositionDragging: false }));
+  }, []);
+
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (!cropConfig.enabled || !imageRef.current) return;
 
@@ -225,21 +285,32 @@ const CropControls: React.FC<CropControlsProps> = ({
 
   // Effect to handle global mouse events
   useEffect(() => {
-    if (!selection.isDragging) return;
+    if (!selection.isDragging && !positionDrag.isPositionDragging) return;
 
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (!imageRef.current || !containerRef.current) return;
-      const coords = getImageCoordinates(e.clientX, e.clientY);
-      const { endX, endY } = constrainToAspectRatio(selection.startX, selection.startY, coords.x, coords.y);
-      setSelection(prev => ({
-        ...prev,
-        endX,
-        endY,
-      }));
+
+      if (selection.isDragging) {
+        // Handle crop selection dragging
+        const coords = getImageCoordinates(e.clientX, e.clientY);
+        const { endX, endY } = constrainToAspectRatio(selection.startX, selection.startY, coords.x, coords.y);
+        setSelection(prev => ({
+          ...prev,
+          endX,
+          endY,
+        }));
+      } else if (positionDrag.isPositionDragging) {
+        // Handle position dragging
+        handlePositionDrag(e as any);
+      }
     };
 
     const handleGlobalMouseUp = () => {
-      setSelection(prev => ({ ...prev, isDragging: false }));
+      if (selection.isDragging) {
+        setSelection(prev => ({ ...prev, isDragging: false }));
+      } else if (positionDrag.isPositionDragging) {
+        handlePositionDragEnd();
+      }
     };
 
     document.addEventListener('mousemove', handleGlobalMouseMove);
@@ -249,7 +320,16 @@ const CropControls: React.FC<CropControlsProps> = ({
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [selection.isDragging, selection.startX, selection.startY, getImageCoordinates, constrainToAspectRatio]);
+  }, [
+    selection.isDragging,
+    selection.startX,
+    selection.startY,
+    positionDrag.isPositionDragging,
+    getImageCoordinates,
+    constrainToAspectRatio,
+    handlePositionDrag,
+    handlePositionDragEnd
+  ]);
 
   return (
     <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
@@ -347,20 +427,53 @@ const CropControls: React.FC<CropControlsProps> = ({
 
                       return (
                         <div
-                          className="absolute border-2 border-purple-500 bg-purple-200/20 dark:bg-purple-400/20"
+                          className={`absolute border-2 transition-all duration-200 ${
+                            positionDrag.isPositionDragging
+                              ? 'border-blue-500 bg-blue-200/30 dark:bg-blue-400/30 cursor-move'
+                              : 'border-purple-500 bg-purple-200/20 dark:bg-purple-400/20 cursor-pointer'
+                          }`}
                           style={{
                             left: `${left}px`,
                             top: `${top}px`,
                             width: `${width}px`,
                             height: `${height}px`,
-                            pointerEvents: 'none',
+                            pointerEvents: 'auto',
                           }}
+                          onDoubleClick={handleCropDoubleClick}
+                          onMouseMove={positionDrag.isPositionDragging ? handlePositionDrag : undefined}
+                          onMouseUp={positionDrag.isPositionDragging ? handlePositionDragEnd : undefined}
                         >
                           {/* Corner indicators */}
-                          <div className="absolute -top-1 -left-1 w-2 h-2 bg-purple-500 rounded-full"></div>
-                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full"></div>
-                          <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-purple-500 rounded-full"></div>
-                          <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <div className={`absolute -top-1 -left-1 w-2 h-2 rounded-full ${
+                            positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
+                          }`}></div>
+                          <div className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${
+                            positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
+                          }`}></div>
+                          <div className={`absolute -bottom-1 -left-1 w-2 h-2 rounded-full ${
+                            positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
+                          }`}></div>
+                          <div className={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full ${
+                            positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
+                          }`}></div>
+
+                          {/* Position adjustment hint */}
+                          {!positionDrag.isPositionDragging && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="bg-purple-600 text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
+                                ダブルクリックで移動
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Position dragging indicator */}
+                          {positionDrag.isPositionDragging && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="bg-blue-600 text-white text-xs px-2 py-1 rounded pointer-events-none">
+                                位置調整中...
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })()}
@@ -373,6 +486,9 @@ const CropControls: React.FC<CropControlsProps> = ({
                 <div className="mt-3 text-xs text-slate-600 dark:text-slate-400 space-y-1">
                   <div>Position: ({Math.round(cropConfig.x)}, {Math.round(cropConfig.y)})</div>
                   <div>Size: {Math.round(cropConfig.width)} × {Math.round(cropConfig.height)}px</div>
+                  <div className="text-purple-600 dark:text-purple-400">
+                    ヒント: 枠をダブルクリック＆ドラッグで位置調整
+                  </div>
                 </div>
               )}
             </div>
