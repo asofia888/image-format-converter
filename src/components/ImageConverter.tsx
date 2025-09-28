@@ -25,9 +25,11 @@ const ImageConverter: React.FC = () => {
     isDownloadReady,
     isConverting,
     resizeConfig,
+    cropConfig,
     presets,
     activePresetId,
     setResizeConfig,
+    setCropConfig,
     handleFilesSelect,
     setTargetFormat,
     setQuality,
@@ -174,8 +176,11 @@ const ImageConverter: React.FC = () => {
                 onDownloadZip={handleDownloadZip}
                 convertedImageSrc={!isBatchMode && files[0] ? files[0].convertedSrc : null}
                 convertedFileName={!isBatchMode && files[0] ? getConvertedFileName(files[0].file, files[0].customName) : ''}
+                originalImageSrc={!isBatchMode && files[0] ? files[0].originalSrc : null}
                 resizeConfig={resizeConfig}
                 setResizeConfig={setResizeConfig}
+                cropConfig={cropConfig}
+                setCropConfig={setCropConfig}
                 originalDimensions={!isBatchMode && files[0] ? { width: files[0].trueOriginalWidth, height: files[0].trueOriginalHeight } : null}
                 presets={presets}
                 activePresetId={activePresetId}

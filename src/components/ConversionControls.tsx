@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
-import type { TargetFormat, Preset, ResizeConfig } from '../types';
+import type { TargetFormat, Preset, ResizeConfig, CropConfig } from '../types';
 import PresetControls from './PresetControls';
 import FormatQualityControls from './FormatQualityControls';
 import ResizeControls from './ResizeControls';
+import CropControls from './CropControls';
 import ActionButtons from './ActionButtons';
 
 interface ConversionControlsProps {
@@ -19,8 +20,11 @@ interface ConversionControlsProps {
   onDownloadZip: () => void;
   convertedImageSrc: string | null;
   convertedFileName: string;
+  originalImageSrc: string | null;
   resizeConfig: ResizeConfig;
   setResizeConfig: React.Dispatch<React.SetStateAction<ResizeConfig>>;
+  cropConfig: CropConfig;
+  setCropConfig: React.Dispatch<React.SetStateAction<CropConfig>>;
   originalDimensions: { width: number; height: number } | null;
   presets: Preset[];
   activePresetId: string;
@@ -43,8 +47,11 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
   onDownloadZip,
   convertedImageSrc,
   convertedFileName,
+  originalImageSrc,
   resizeConfig,
   setResizeConfig,
+  cropConfig,
+  setCropConfig,
   originalDimensions,
   presets,
   activePresetId,
@@ -80,6 +87,14 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
         resizeConfig={resizeConfig}
         setResizeConfig={setResizeConfig}
         originalDimensions={originalDimensions}
+      />
+
+      {/* Crop Controls */}
+      <CropControls
+        cropConfig={cropConfig}
+        setCropConfig={setCropConfig}
+        originalDimensions={originalDimensions}
+        imageSrc={originalImageSrc}
       />
 
       {/* Action Buttons */}
