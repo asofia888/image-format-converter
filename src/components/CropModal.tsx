@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { CropConfig } from '../types';
 import Icon from './Icon';
 import { useTranslation } from '../hooks/useTranslation';
@@ -28,13 +28,12 @@ const CropModal: React.FC<CropModalProps> = ({
   onCropChange,
 }) => {
   const { t } = useTranslation();
-  const modalRef = useRef<HTMLDivElement>(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<any>(null);
   const [Cropper, setCropper] = useState<any>(null);
 
-  useFocusTrap(modalRef);
+  const modalRef = useFocusTrap(onClose);
 
   // Load react-easy-crop dynamically
   useEffect(() => {

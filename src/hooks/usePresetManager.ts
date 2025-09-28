@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import type { Preset, TargetFormat, ResizeConfig, ProcessedFile } from '../types';
+import type { Preset, TargetFormat, ResizeConfig, CropConfig, ProcessedFile } from '../types';
 import { useTranslation } from './useTranslation';
 
 const PRESETS_KEY = 'imageConverterPresets';
@@ -18,6 +18,13 @@ const defaultPresets: Preset[] = [
         unit: 'px',
         maintainAspectRatio: true,
       },
+      cropConfig: {
+        enabled: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      },
     },
   },
   {
@@ -32,6 +39,13 @@ const defaultPresets: Preset[] = [
         height: '400',
         unit: 'px',
         maintainAspectRatio: false,
+      },
+      cropConfig: {
+        enabled: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
       },
     },
   },
@@ -48,6 +62,13 @@ const defaultPresets: Preset[] = [
         unit: 'px',
         maintainAspectRatio: true,
       },
+      cropConfig: {
+        enabled: false,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      },
     },
   },
 ];
@@ -56,10 +77,12 @@ interface UsePresetManagerProps {
   targetFormat: TargetFormat;
   quality: number;
   resizeConfig: ResizeConfig;
+  cropConfig: CropConfig;
   files: ProcessedFile[];
   setTargetFormat: (format: TargetFormat) => void;
   setQuality: (quality: number) => void;
   setResizeConfig: (config: ResizeConfig | ((prev: ResizeConfig) => ResizeConfig)) => void;
+  setCropConfig: (config: CropConfig | ((prev: CropConfig) => CropConfig)) => void;
   setLiveRegionMessage: (message: string) => void;
 }
 
@@ -67,10 +90,12 @@ export const usePresetManager = ({
   targetFormat,
   quality,
   resizeConfig,
+  cropConfig,
   files,
   setTargetFormat,
   setQuality,
   setResizeConfig,
+  setCropConfig,
   setLiveRegionMessage,
 }: UsePresetManagerProps) => {
   const [presets, setPresets] = useState<Preset[]>([]);
@@ -95,10 +120,10 @@ export const usePresetManager = ({
 
   // Effect to automatically select a preset if current settings match one
   useEffect(() => {
-    const currentSettings = { targetFormat, quality, resizeConfig };
+    const currentSettings = { targetFormat, quality, resizeConfig, cropConfig };
     const matchingPreset = presets.find(p => JSON.stringify(p.settings) === JSON.stringify(currentSettings));
     setActivePresetId(matchingPreset ? matchingPreset.id : '');
-  }, [targetFormat, quality, resizeConfig, presets]);
+  }, [targetFormat, quality, resizeConfig, cropConfig, presets]);
 
   const handleSavePreset = useCallback((name: string) => {
     if (!name.trim()) return;
@@ -110,6 +135,7 @@ export const usePresetManager = ({
         targetFormat,
         quality,
         resizeConfig: { ...resizeConfig },
+        cropConfig: { ...cropConfig },
       },
     };
 
@@ -132,7 +158,7 @@ export const usePresetManager = ({
     } catch (e) {
       console.error("Failed to save presets to localStorage", e);
     }
-  }, [targetFormat, quality, resizeConfig, presets, t, setLiveRegionMessage]);
+  }, [targetFormat, quality, resizeConfig, cropConfig, presets, t, setLiveRegionMessage]);
 
   const handleApplyPreset = useCallback((id: string) => {
     const preset = presets.find(p => p.id === id);
@@ -160,8 +186,9 @@ export const usePresetManager = ({
     }
 
     setResizeConfig(newResizeConfig);
+    setCropConfig({ ...preset.settings.cropConfig });
     setActivePresetId(id);
-  }, [presets, files, setTargetFormat, setQuality, setResizeConfig]);
+  }, [presets, files, setTargetFormat, setQuality, setResizeConfig, setCropConfig]);
 
   const handleDeletePreset = useCallback((id: string) => {
     const presetToDelete = presets.find(p => p.id === id);
