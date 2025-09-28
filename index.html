@@ -13,11 +13,11 @@
     <!-- Security Headers -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
-      script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://aistudiocdn.com;
-      style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+      script-src 'self' 'unsafe-inline' https://aistudiocdn.com;
+      style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob:;
       font-src 'self' https://fonts.gstatic.com;
-      connect-src 'self' https://aistudiocdn.com https://cdn.tailwindcss.com;
+      connect-src 'self' https://aistudiocdn.com;
       object-src 'none';
       base-uri 'self';
       form-action 'self';
@@ -46,13 +46,8 @@
     <link rel="canonical" href="https://image-format-converter-eight.vercel.app/" />
 
     <!-- Preconnect to improve performance -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com" />
     <link rel="preconnect" href="https://aistudiocdn.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-
-    <!-- Preload critical resources -->
-    <link rel="preload" href="/icons/icon-192x192.png" as="image" type="image/png" />
-    <link rel="preload" href="/manifest.json" as="fetch" crossorigin="anonymous" />
 
     <!-- SEO Files -->
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
@@ -85,24 +80,6 @@
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     <link rel="mask-icon" href="/logo.png" color="#8b5cf6" />
 
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              'brand-primary': '#007BFF',
-              'brand-secondary': '#6C757D',
-              'brand-success': '#28A745',
-              'brand-danger': '#DC3545',
-              'brand-light': '#F8F9FA',
-              'brand-dark': '#343A40',
-            },
-          },
-        },
-      }
-    </script>
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
     {
