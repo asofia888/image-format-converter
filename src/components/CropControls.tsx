@@ -116,6 +116,47 @@ const CropControls: React.FC<CropControlsProps> = ({
     return { endX: clampedEndX, endY: clampedEndY };
   }, [cropConfig.constrainAspectRatio, cropConfig.aspectRatio]);
 
+  // Handle width slider change
+  const handleWidthChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!originalDimensions) return;
+
+    const newWidth = Number(e.target.value);
+    let newHeight = cropConfig.height;
+
+    // If aspect ratio is constrained, calculate new height
+    if (cropConfig.constrainAspectRatio && cropConfig.aspectRatio) {
+      newHeight = newWidth / cropConfig.aspectRatio;
+    }
+
+    // Ensure the crop area doesn't exceed image bounds
+    const maxX = Math.min(cropConfig.x, originalDimensions.width - newWidth);
+    const maxY = Math.min(cropConfig.y, originalDimensions.height - newHeight);
+
+    setCropConfig(prev => ({
+      ...prev,
+      width: newWidth,
+      height: newHeight,
+      x: Math.max(0, maxX),
+      y: Math.max(0, maxY),
+    }));
+  }, [cropConfig, originalDimensions, setCropConfig]);
+
+  // Handle height slider change
+  const handleHeightChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!originalDimensions || cropConfig.constrainAspectRatio) return;
+
+    const newHeight = Number(e.target.value);
+
+    // Ensure the crop area doesn't exceed image bounds
+    const maxY = Math.min(cropConfig.y, originalDimensions.height - newHeight);
+
+    setCropConfig(prev => ({
+      ...prev,
+      height: newHeight,
+      y: Math.max(0, maxY),
+    }));
+  }, [cropConfig, originalDimensions, setCropConfig]);
+
   // Convert screen coordinates to image coordinates
   const getImageCoordinates = useCallback((clientX: number, clientY: number) => {
     if (!imageRef.current || !containerRef.current) return { x: 0, y: 0 };
@@ -335,6 +376,52 @@ const CropControls: React.FC<CropControlsProps> = ({
                 </div>
               )}
             </div>
+
+            {/* Crop Size Adjustment Sliders */}
+            {hasCropData && originalDimensions && (
+              <div className="mt-4 space-y-4">
+                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">枠のサイズ調整</h4>
+
+                {/* Width Slider */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-400">横幅</label>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{Math.round(cropConfig.width)}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="50"
+                    max={originalDimensions.width}
+                    value={cropConfig.width}
+                    onChange={handleWidthChange}
+                    disabled={!cropConfig.enabled}
+                    className="w-full h-2 bg-slate-200 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-500 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                  />
+                </div>
+
+                {/* Height Slider */}
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-medium text-slate-600 dark:text-slate-400">縦幅</label>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">{Math.round(cropConfig.height)}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="50"
+                    max={originalDimensions.height}
+                    value={cropConfig.height}
+                    onChange={handleHeightChange}
+                    disabled={!cropConfig.enabled || cropConfig.constrainAspectRatio}
+                    className="w-full h-2 bg-slate-200 dark:bg-slate-600 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-purple-500 [&::-webkit-slider-thumb]:cursor-pointer [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-purple-500 [&::-moz-range-thumb]:border-0 [&::-moz-range-thumb]:cursor-pointer"
+                  />
+                  {cropConfig.constrainAspectRatio && (
+                    <div className="text-xs text-purple-600 dark:text-purple-400">
+                      アスペクト比固定のため、横幅に連動します
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Apply Crop Button */}
             {hasCropData && onApplyCrop && (
