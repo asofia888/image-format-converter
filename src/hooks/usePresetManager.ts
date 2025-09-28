@@ -3,6 +3,8 @@ import type { Preset, TargetFormat, ResizeConfig, CropConfig, ProcessedFile } fr
 import { useTranslation } from './useTranslation';
 
 const PRESETS_KEY = 'imageConverterPresets';
+const PRESETS_VERSION_KEY = 'imageConverterPresetsVersion';
+const CURRENT_PRESETS_VERSION = '2.0'; // Updated to include social media presets
 
 const defaultPresets: Preset[] = [
   {
@@ -193,16 +195,36 @@ export const usePresetManager = ({
   // Load presets from localStorage on initial mount, or set defaults
   useEffect(() => {
     try {
+      const savedVersion = window.localStorage.getItem(PRESETS_VERSION_KEY);
       const savedPresets = window.localStorage.getItem(PRESETS_KEY);
-      if (savedPresets) {
-        setPresets(JSON.parse(savedPresets));
-      } else {
+
+      // If version doesn't match or no presets exist, use defaults
+      if (savedVersion !== CURRENT_PRESETS_VERSION || !savedPresets) {
+        console.log('Updating presets to version', CURRENT_PRESETS_VERSION, 'from version', savedVersion);
         setPresets(defaultPresets);
         window.localStorage.setItem(PRESETS_KEY, JSON.stringify(defaultPresets));
+        window.localStorage.setItem(PRESETS_VERSION_KEY, CURRENT_PRESETS_VERSION);
+      } else {
+        // Parse saved presets and merge with defaults to ensure all default presets exist
+        const parsedPresets = JSON.parse(savedPresets);
+        const mergedPresets = [...defaultPresets];
+
+        // Add custom presets (user-created) from saved data
+        parsedPresets.forEach((preset: Preset) => {
+          if (preset.id.startsWith('custom_') && !mergedPresets.find(p => p.id === preset.id)) {
+            mergedPresets.push(preset);
+          }
+        });
+
+        setPresets(mergedPresets);
+        // Update localStorage with merged presets
+        window.localStorage.setItem(PRESETS_KEY, JSON.stringify(mergedPresets));
       }
     } catch (e) {
       console.error("Failed to load presets from localStorage, using defaults.", e);
       setPresets(defaultPresets);
+      window.localStorage.setItem(PRESETS_KEY, JSON.stringify(defaultPresets));
+      window.localStorage.setItem(PRESETS_VERSION_KEY, CURRENT_PRESETS_VERSION);
     }
   }, []);
 
