@@ -81,6 +81,7 @@ const ResizeControls: React.FC<ResizeControlsProps> = ({
               type="number"
               id="width-input"
               value={resizeConfig.width}
+              placeholder={originalDimensions ? String(originalDimensions.width) : ''}
               onChange={(e) => handleResizeChange('width', e.target.value)}
               className="w-full bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded-l-md pl-3 py-2 sm:text-sm text-slate-900 dark:text-white border-y border-l focus:ring-1 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
               disabled={!resizeConfig.enabled}
@@ -97,6 +98,7 @@ const ResizeControls: React.FC<ResizeControlsProps> = ({
               type="number"
               id="height-input"
               value={resizeConfig.height}
+              placeholder={originalDimensions ? String(originalDimensions.height) : ''}
               onChange={(e) => handleResizeChange('height', e.target.value)}
               className="w-full bg-slate-100 dark:bg-slate-700 border-slate-300 dark:border-slate-600 rounded-l-md pl-3 py-2 sm:text-sm text-slate-900 dark:text-white border-y border-l focus:ring-1 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
               disabled={!resizeConfig.enabled}
