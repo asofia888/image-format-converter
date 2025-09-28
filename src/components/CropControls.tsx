@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import type { CropConfig } from '../types';
 import Icon from './Icon';
 import { useTranslation } from '../hooks/useTranslation';
@@ -11,31 +11,163 @@ interface CropControlsProps {
   onCropModalOpen?: () => void;
 }
 
+interface CropSelection {
+  startX: number;
+  startY: number;
+  endX: number;
+  endY: number;
+  isDragging: boolean;
+}
+
 const CropControls: React.FC<CropControlsProps> = ({
   cropConfig,
   setCropConfig,
   originalDimensions,
   imageSrc,
-  onCropModalOpen,
 }) => {
   const { t } = useTranslation();
+  const [selection, setSelection] = useState<CropSelection>({
+    startX: 0,
+    startY: 0,
+    endX: 0,
+    endY: 0,
+    isDragging: false,
+  });
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const handleToggleCrop = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setCropConfig(prev => ({ ...prev, enabled: e.target.checked }));
+    const enabled = e.target.checked;
+    setCropConfig(prev => ({ ...prev, enabled }));
+    if (!enabled) {
+      // Reset crop selection when disabled
+      setCropConfig(prev => ({
+        ...prev,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
+      }));
+      setSelection({
+        startX: 0,
+        startY: 0,
+        endX: 0,
+        endY: 0,
+        isDragging: false,
+      });
+    }
   }, [setCropConfig]);
 
   const handleResetCrop = useCallback(() => {
     setCropConfig(prev => ({
       ...prev,
-      enabled: false,
       x: 0,
       y: 0,
       width: 0,
       height: 0,
     }));
+    setSelection({
+      startX: 0,
+      startY: 0,
+      endX: 0,
+      endY: 0,
+      isDragging: false,
+    });
   }, [setCropConfig]);
 
   const hasCropData = cropConfig.width > 0 && cropConfig.height > 0;
+
+  // Convert screen coordinates to image coordinates
+  const getImageCoordinates = useCallback((clientX: number, clientY: number) => {
+    if (!imageRef.current || !containerRef.current) return { x: 0, y: 0 };
+
+    const imageRect = imageRef.current.getBoundingClientRect();
+
+    const x = clientX - imageRect.left;
+    const y = clientY - imageRect.top;
+
+    // Convert to actual image coordinates
+    const scaleX = imageRef.current.naturalWidth / imageRect.width;
+    const scaleY = imageRef.current.naturalHeight / imageRect.height;
+
+    return {
+      x: Math.max(0, Math.min(x * scaleX, imageRef.current.naturalWidth)),
+      y: Math.max(0, Math.min(y * scaleY, imageRef.current.naturalHeight))
+    };
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!cropConfig.enabled || !imageRef.current) return;
+
+    const coords = getImageCoordinates(e.clientX, e.clientY);
+    setSelection({
+      startX: coords.x,
+      startY: coords.y,
+      endX: coords.x,
+      endY: coords.y,
+      isDragging: true,
+    });
+  }, [cropConfig.enabled, getImageCoordinates]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!selection.isDragging || !imageRef.current) return;
+
+    const coords = getImageCoordinates(e.clientX, e.clientY);
+    setSelection(prev => ({
+      ...prev,
+      endX: coords.x,
+      endY: coords.y,
+    }));
+  }, [selection.isDragging, getImageCoordinates]);
+
+  const handleMouseUp = useCallback(() => {
+    if (!selection.isDragging) return;
+
+    const x = Math.min(selection.startX, selection.endX);
+    const y = Math.min(selection.startY, selection.endY);
+    const width = Math.abs(selection.endX - selection.startX);
+    const height = Math.abs(selection.endY - selection.startY);
+
+    if (width > 10 && height > 10) { // Minimum size threshold
+      setCropConfig(prev => ({
+        ...prev,
+        x,
+        y,
+        width,
+        height,
+      }));
+    }
+
+    setSelection(prev => ({ ...prev, isDragging: false }));
+  }, [selection, setCropConfig]);
+
+  // Effect to handle global mouse events
+  useEffect(() => {
+    if (!selection.isDragging) return;
+
+    const handleGlobalMouseMove = (e: MouseEvent) => {
+      if (!imageRef.current || !containerRef.current) return;
+      const coords = getImageCoordinates(e.clientX, e.clientY);
+      setSelection(prev => ({
+        ...prev,
+        endX: coords.x,
+        endY: coords.y,
+      }));
+    };
+
+    const handleGlobalMouseUp = () => {
+      setSelection(prev => ({ ...prev, isDragging: false }));
+    };
+
+    document.addEventListener('mousemove', handleGlobalMouseMove);
+    document.addEventListener('mouseup', handleGlobalMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleGlobalMouseMove);
+      document.removeEventListener('mouseup', handleGlobalMouseUp);
+    };
+  }, [selection.isDragging, getImageCoordinates]);
 
   return (
     <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
@@ -63,12 +195,13 @@ const CropControls: React.FC<CropControlsProps> = ({
       <div className={`transition-opacity ${cropConfig.enabled ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
         {imageSrc && originalDimensions ? (
           <div className="space-y-4">
-            {hasCropData ? (
-              <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    {t('cropPreviewLabel')}
-                  </span>
+            {/* Interactive Image Crop Area */}
+            <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  {t('cropInstructionLabel')}
+                </span>
+                {hasCropData && (
                   <button
                     onClick={handleResetCrop}
                     disabled={!cropConfig.enabled}
@@ -76,33 +209,82 @@ const CropControls: React.FC<CropControlsProps> = ({
                   >
                     {t('resetCropButton')}
                   </button>
-                </div>
-                <div className="text-xs text-slate-600 dark:text-slate-400 space-y-1">
+                )}
+              </div>
+
+              {/* Image Container with Crop Selection */}
+              <div
+                ref={containerRef}
+                className="relative bg-slate-200 dark:bg-slate-700 rounded-lg overflow-hidden"
+                style={{ aspectRatio: `${originalDimensions.width} / ${originalDimensions.height}`, maxHeight: '400px' }}
+              >
+                <img
+                  ref={imageRef}
+                  src={imageSrc}
+                  alt="Crop selection"
+                  className={`w-full h-full object-contain ${cropConfig.enabled ? 'cursor-crosshair' : ''}`}
+                  onLoad={() => setImageLoaded(true)}
+                  onMouseDown={handleMouseDown}
+                  onMouseMove={handleMouseMove}
+                  onMouseUp={handleMouseUp}
+                  draggable={false}
+                />
+
+                {/* Crop Selection Overlay */}
+                {cropConfig.enabled && imageLoaded && imageRef.current && (hasCropData || selection.isDragging) && (
+                  <>
+                    {(() => {
+                      const imageRect = imageRef.current?.getBoundingClientRect();
+                      const containerRect = containerRef.current?.getBoundingClientRect();
+
+                      if (!imageRect || !containerRect) return null;
+
+                      // Use crop config if available, otherwise use current selection
+                      const displayX = hasCropData ? cropConfig.x : Math.min(selection.startX, selection.endX);
+                      const displayY = hasCropData ? cropConfig.y : Math.min(selection.startY, selection.endY);
+                      const displayWidth = hasCropData ? cropConfig.width : Math.abs(selection.endX - selection.startX);
+                      const displayHeight = hasCropData ? cropConfig.height : Math.abs(selection.endY - selection.startY);
+
+                      // Convert image coordinates to display coordinates
+                      const scaleX = imageRect.width / imageRef.current.naturalWidth;
+                      const scaleY = imageRect.height / imageRef.current.naturalHeight;
+
+                      const left = displayX * scaleX;
+                      const top = displayY * scaleY;
+                      const width = displayWidth * scaleX;
+                      const height = displayHeight * scaleY;
+
+                      return (
+                        <div
+                          className="absolute border-2 border-purple-500 bg-purple-200/20 dark:bg-purple-400/20"
+                          style={{
+                            left: `${left}px`,
+                            top: `${top}px`,
+                            width: `${width}px`,
+                            height: `${height}px`,
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          {/* Corner indicators */}
+                          <div className="absolute -top-1 -left-1 w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-purple-500 rounded-full"></div>
+                          <div className="absolute -bottom-1 -right-1 w-2 h-2 bg-purple-500 rounded-full"></div>
+                        </div>
+                      );
+                    })()}
+                  </>
+                )}
+              </div>
+
+              {/* Crop Information */}
+              {hasCropData && (
+                <div className="mt-3 text-xs text-slate-600 dark:text-slate-400 space-y-1">
                   <div>Position: ({Math.round(cropConfig.x)}, {Math.round(cropConfig.y)})</div>
                   <div>Size: {Math.round(cropConfig.width)} × {Math.round(cropConfig.height)}px</div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-sm text-slate-600 dark:text-slate-400 text-center py-2">
-                {t('cropInstructionLabel')}
-              </div>
-            )}
-
-            <button
-              onClick={onCropModalOpen}
-              disabled={!cropConfig.enabled}
-              className={`
-                w-full flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200
-                focus:outline-none focus:ring-2 focus:ring-purple-500
-                ${cropConfig.enabled
-                  ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border border-purple-300 dark:border-purple-700 hover:bg-purple-200 dark:hover:bg-purple-900/50'
-                  : 'bg-slate-200 dark:bg-slate-700 text-slate-500 dark:text-slate-400 border border-slate-300 dark:border-slate-600 cursor-not-allowed'
-                }
-              `}
-            >
-              <Icon name="crop" className="w-4 h-4" />
-              {hasCropData ? t('editCropButton') : t('cropButton')}
-            </button>
+              )}
+            </div>
           </div>
         ) : (
           <div className="text-sm text-slate-500 dark:text-slate-400 text-center py-4">
