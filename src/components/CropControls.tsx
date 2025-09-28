@@ -81,6 +81,41 @@ const CropControls: React.FC<CropControlsProps> = ({
 
   const hasCropData = cropConfig.width > 0 && cropConfig.height > 0;
 
+  // Helper function to constrain selection to aspect ratio
+  const constrainToAspectRatio = useCallback((startX: number, startY: number, endX: number, endY: number) => {
+    if (!cropConfig.constrainAspectRatio || !cropConfig.aspectRatio || !imageRef.current) {
+      return { endX, endY };
+    }
+
+    const targetAspectRatio = cropConfig.aspectRatio;
+    let width = Math.abs(endX - startX);
+    let height = Math.abs(endY - startY);
+
+    // Calculate constrained dimensions based on aspect ratio
+    const currentAspectRatio = width / height;
+
+    if (currentAspectRatio > targetAspectRatio) {
+      // Too wide, constrain width
+      width = height * targetAspectRatio;
+    } else {
+      // Too tall, constrain height
+      height = width / targetAspectRatio;
+    }
+
+    // Calculate new end coordinates while maintaining direction
+    const newEndX = startX + (endX >= startX ? width : -width);
+    const newEndY = startY + (endY >= startY ? height : -height);
+
+    // Ensure we don't go outside image bounds
+    const imageWidth = imageRef.current.naturalWidth;
+    const imageHeight = imageRef.current.naturalHeight;
+
+    const clampedEndX = Math.max(0, Math.min(newEndX, imageWidth));
+    const clampedEndY = Math.max(0, Math.min(newEndY, imageHeight));
+
+    return { endX: clampedEndX, endY: clampedEndY };
+  }, [cropConfig.constrainAspectRatio, cropConfig.aspectRatio]);
+
   // Convert screen coordinates to image coordinates
   const getImageCoordinates = useCallback((clientX: number, clientY: number) => {
     if (!imageRef.current || !containerRef.current) return { x: 0, y: 0 };
@@ -117,12 +152,14 @@ const CropControls: React.FC<CropControlsProps> = ({
     if (!selection.isDragging || !imageRef.current) return;
 
     const coords = getImageCoordinates(e.clientX, e.clientY);
+    const { endX, endY } = constrainToAspectRatio(selection.startX, selection.startY, coords.x, coords.y);
+
     setSelection(prev => ({
       ...prev,
-      endX: coords.x,
-      endY: coords.y,
+      endX,
+      endY,
     }));
-  }, [selection.isDragging, getImageCoordinates]);
+  }, [selection.isDragging, selection.startX, selection.startY, getImageCoordinates, constrainToAspectRatio]);
 
   const handleMouseUp = useCallback(() => {
     if (!selection.isDragging) return;
@@ -152,10 +189,11 @@ const CropControls: React.FC<CropControlsProps> = ({
     const handleGlobalMouseMove = (e: MouseEvent) => {
       if (!imageRef.current || !containerRef.current) return;
       const coords = getImageCoordinates(e.clientX, e.clientY);
+      const { endX, endY } = constrainToAspectRatio(selection.startX, selection.startY, coords.x, coords.y);
       setSelection(prev => ({
         ...prev,
-        endX: coords.x,
-        endY: coords.y,
+        endX,
+        endY,
       }));
     };
 
@@ -170,7 +208,7 @@ const CropControls: React.FC<CropControlsProps> = ({
       document.removeEventListener('mousemove', handleGlobalMouseMove);
       document.removeEventListener('mouseup', handleGlobalMouseUp);
     };
-  }, [selection.isDragging, getImageCoordinates]);
+  }, [selection.isDragging, selection.startX, selection.startY, getImageCoordinates, constrainToAspectRatio]);
 
   return (
     <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
@@ -201,9 +239,18 @@ const CropControls: React.FC<CropControlsProps> = ({
             {/* Interactive Image Crop Area */}
             <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                  {t('cropInstructionLabel')}
-                </span>
+                <div className="flex-1">
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {t('cropInstructionLabel')}
+                  </span>
+                  {cropConfig.constrainAspectRatio && cropConfig.aspectRatio && (
+                    <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                      アスペクト比: {cropConfig.aspectRatio === 1.0 ? '1:1 (正方形)' :
+                        cropConfig.aspectRatio > 1 ? `${cropConfig.aspectRatio.toFixed(2)}:1 (横長)` :
+                        `1:${(1/cropConfig.aspectRatio).toFixed(2)} (縦長)`}
+                    </div>
+                  )}
+                </div>
                 {hasCropData && (
                   <button
                     onClick={handleResetCrop}

@@ -61,6 +61,7 @@ const CropModal: React.FC<CropModalProps> = ({
         y: croppedAreaPixels.y,
         width: croppedAreaPixels.width,
         height: croppedAreaPixels.height,
+        constrainAspectRatio: false,
       });
     }
     onClose();

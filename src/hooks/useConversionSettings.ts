@@ -21,6 +21,7 @@ const getInitialSettings = () => {
       y: 0,
       width: 0,
       height: 0,
+      constrainAspectRatio: false,
     },
   };
 
@@ -83,6 +84,7 @@ export const useConversionSettings = () => {
       y: 0,
       width: 0,
       height: 0,
+      constrainAspectRatio: false,
     }));
   };
 

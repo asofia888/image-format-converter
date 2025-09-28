@@ -21,6 +21,8 @@ export interface CropConfig {
   y: number;
   width: number;
   height: number;
+  aspectRatio?: number; // Fixed aspect ratio (width/height) when set
+  constrainAspectRatio: boolean; // Whether to maintain aspect ratio during selection
 }
 
 export interface Preset {

@@ -4,7 +4,7 @@ import { useTranslation } from './useTranslation';
 
 const PRESETS_KEY = 'imageConverterPresets';
 const PRESETS_VERSION_KEY = 'imageConverterPresetsVersion';
-const CURRENT_PRESETS_VERSION = '2.0'; // Updated to include social media presets
+const CURRENT_PRESETS_VERSION = '2.1'; // Updated to include aspect ratio constraints
 
 const defaultPresets: Preset[] = [
   {
@@ -26,6 +26,8 @@ const defaultPresets: Preset[] = [
         y: 0,
         width: 0,
         height: 0,
+        aspectRatio: 1.0, // 1:1 aspect ratio for Instagram
+        constrainAspectRatio: true,
       },
     },
   },
@@ -48,6 +50,8 @@ const defaultPresets: Preset[] = [
         y: 0,
         width: 0,
         height: 0,
+        aspectRatio: 1200 / 675, // 16:9 aspect ratio for Twitter
+        constrainAspectRatio: true,
       },
     },
   },
@@ -70,6 +74,8 @@ const defaultPresets: Preset[] = [
         y: 0,
         width: 0,
         height: 0,
+        aspectRatio: 1080 / 1920, // 9:16 aspect ratio for TikTok
+        constrainAspectRatio: true,
       },
     },
   },
@@ -92,6 +98,7 @@ const defaultPresets: Preset[] = [
         y: 0,
         width: 0,
         height: 0,
+        constrainAspectRatio: false, // Free form cropping for custom
       },
     },
   },
@@ -114,6 +121,7 @@ const defaultPresets: Preset[] = [
         y: 0,
         width: 0,
         height: 0,
+        constrainAspectRatio: false, // Free form cropping for blog posts
       },
     },
   },
@@ -136,6 +144,8 @@ const defaultPresets: Preset[] = [
         y: 0,
         width: 0,
         height: 0,
+        aspectRatio: 1.0, // 1:1 aspect ratio for social icons
+        constrainAspectRatio: true,
       },
     },
   },
@@ -158,6 +168,7 @@ const defaultPresets: Preset[] = [
         y: 0,
         width: 0,
         height: 0,
+        constrainAspectRatio: false, // Free form cropping for compression
       },
     },
   },
