@@ -54,9 +54,9 @@ const ErrorTestComponent: React.FC = () => {
 
   return (
     <div className="fixed bottom-4 right-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg p-4 max-w-sm">
-      <h3 className="font-bold text-red-800 dark:text-red-200 mb-2">
+      <h2 className="font-bold text-red-800 dark:text-red-200 mb-2">
         🧪 Error Testing (Dev Only)
-      </h3>
+      </h2>
       <div className="space-y-2">
         <button
           onClick={handleSyncError}

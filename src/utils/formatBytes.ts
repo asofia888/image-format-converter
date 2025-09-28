@@ -1,10 +1,18 @@
 export const formatBytes = (bytes: number, decimals = 2): string => {
     if (!+bytes) return '0 Bytes';
+
+    // Handle negative numbers
+    if (bytes < 0) return 'NaN Bytes';
+
     const k = 1024;
     const dm = decimals < 0 ? 0 : decimals;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+
+    // Ensure i is within the bounds of the sizes array
+    const sizeIndex = Math.min(i, sizes.length - 1);
+
+    return `${parseFloat((bytes / Math.pow(k, sizeIndex)).toFixed(dm))} ${sizes[sizeIndex]}`;
 };
 
 export interface FileSizeInfo {

@@ -58,11 +58,16 @@ export const getErrorMessage = (error: unknown): string => {
  * Log error with context
  */
 export const logError = (context: string, error: unknown, additionalInfo?: Record<string, unknown>): void => {
-  console.error(`[${context}]`, {
-    error: getErrorMessage(error),
-    stack: error instanceof Error ? error.stack : undefined,
-    ...additionalInfo,
-  });
+  try {
+    console.error(`[${context}]`, {
+      error: getErrorMessage(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      ...additionalInfo,
+    });
+  } catch (loggingError) {
+    // If logging fails, silently ignore to prevent cascading errors
+    // In production, this prevents the app from crashing due to logging issues
+  }
 };
 
 /**
