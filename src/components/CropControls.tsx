@@ -55,6 +55,10 @@ const CropControls: React.FC<CropControlsProps> = ({
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const [showGrid, setShowGrid] = useState(true);
+
+  const hasCropData = cropConfig.width > 0 && cropConfig.height > 0;
+
   const handleToggleCrop = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const enabled = e.target.checked;
     setCropConfig(prev => ({ ...prev, enabled }));
@@ -77,6 +81,47 @@ const CropControls: React.FC<CropControlsProps> = ({
     }
   }, [setCropConfig]);
 
+  // Aspect ratio preset handlers
+  const handleAspectRatioPreset = useCallback((ratio: number | null) => {
+    if (ratio === null) {
+      // Free aspect ratio
+      setCropConfig(prev => ({
+        ...prev,
+        constrainAspectRatio: false,
+        aspectRatio: undefined,
+      }));
+    } else {
+      setCropConfig(prev => ({
+        ...prev,
+        constrainAspectRatio: true,
+        aspectRatio: ratio,
+      }));
+
+      // Adjust existing crop to match new ratio if crop exists
+      if (cropConfig.width > 0 && cropConfig.height > 0 && originalDimensions) {
+        const currentWidth = cropConfig.width;
+        const newHeight = currentWidth / ratio;
+
+        // Ensure new dimensions fit within image bounds
+        if (newHeight <= originalDimensions.height - cropConfig.y) {
+          setCropConfig(prev => ({
+            ...prev,
+            height: newHeight,
+          }));
+        } else {
+          // Adjust width to fit
+          const maxHeight = originalDimensions.height - cropConfig.y;
+          const newWidth = maxHeight * ratio;
+          setCropConfig(prev => ({
+            ...prev,
+            width: newWidth,
+            height: maxHeight,
+          }));
+        }
+      }
+    }
+  }, [setCropConfig, cropConfig, originalDimensions]);
+
   const handleResetCrop = useCallback(() => {
     setCropConfig(prev => ({
       ...prev,
@@ -93,8 +138,6 @@ const CropControls: React.FC<CropControlsProps> = ({
       isDragging: false,
     });
   }, [setCropConfig]);
-
-  const hasCropData = cropConfig.width > 0 && cropConfig.height > 0;
 
   // Helper function to constrain selection to aspect ratio
   const constrainToAspectRatio = useCallback((startX: number, startY: number, endX: number, endY: number) => {
@@ -357,6 +400,65 @@ const CropControls: React.FC<CropControlsProps> = ({
       <div className={`transition-opacity ${cropConfig.enabled ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
         {imageSrc && originalDimensions ? (
           <div className="space-y-4">
+            {/* Aspect Ratio Presets */}
+            <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 mb-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-medium text-slate-700 dark:text-slate-300">アスペクト比</h4>
+                <button
+                  onClick={() => setShowGrid(!showGrid)}
+                  className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                >
+                  {showGrid ? 'グリッド非表示' : 'グリッド表示'}
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => handleAspectRatioPreset(null)}
+                  disabled={!cropConfig.enabled}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    !cropConfig.constrainAspectRatio
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  自由
+                </button>
+                <button
+                  onClick={() => handleAspectRatioPreset(1)}
+                  disabled={!cropConfig.enabled}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    cropConfig.constrainAspectRatio && cropConfig.aspectRatio === 1
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  1:1 正方形
+                </button>
+                <button
+                  onClick={() => handleAspectRatioPreset(16 / 9)}
+                  disabled={!cropConfig.enabled}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    cropConfig.constrainAspectRatio && Math.abs((cropConfig.aspectRatio || 0) - 16/9) < 0.01
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  16:9 ワイド
+                </button>
+                <button
+                  onClick={() => handleAspectRatioPreset(4 / 3)}
+                  disabled={!cropConfig.enabled}
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    cropConfig.constrainAspectRatio && Math.abs((cropConfig.aspectRatio || 0) - 4/3) < 0.01
+                      ? 'bg-purple-500 text-white'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  4:3 標準
+                </button>
+              </div>
+            </div>
+
             {/* Interactive Image Crop Area */}
             <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
               <div className="flex items-center justify-between mb-3">
@@ -367,8 +469,10 @@ const CropControls: React.FC<CropControlsProps> = ({
                   {cropConfig.constrainAspectRatio && cropConfig.aspectRatio && (
                     <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
                       アスペクト比: {cropConfig.aspectRatio === 1.0 ? '1:1 (正方形)' :
-                        cropConfig.aspectRatio > 1 ? `${cropConfig.aspectRatio.toFixed(2)}:1 (横長)` :
-                        `1:${(1/cropConfig.aspectRatio).toFixed(2)} (縦長)`}
+                        Math.abs(cropConfig.aspectRatio - 16/9) < 0.01 ? '16:9 (ワイド)' :
+                        Math.abs(cropConfig.aspectRatio - 4/3) < 0.01 ? '4:3 (標準)' :
+                        cropConfig.aspectRatio > 1 ? `${cropConfig.aspectRatio.toFixed(2)}:1` :
+                        `1:${(1/cropConfig.aspectRatio).toFixed(2)}`}
                     </div>
                   )}
                 </div>
@@ -427,7 +531,7 @@ const CropControls: React.FC<CropControlsProps> = ({
 
                       return (
                         <div
-                          className={`absolute border-2 transition-all duration-200 ${
+                          className={`absolute border-3 transition-all duration-200 ${
                             positionDrag.isPositionDragging
                               ? 'border-blue-500 bg-blue-200/30 dark:bg-blue-400/30 cursor-move'
                               : 'border-purple-500 bg-purple-200/20 dark:bg-purple-400/20 cursor-pointer'
@@ -438,29 +542,62 @@ const CropControls: React.FC<CropControlsProps> = ({
                             width: `${width}px`,
                             height: `${height}px`,
                             pointerEvents: 'auto',
+                            borderWidth: '3px',
+                            boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
                           }}
                           onDoubleClick={handleCropDoubleClick}
                           onMouseMove={positionDrag.isPositionDragging ? handlePositionDrag : undefined}
                           onMouseUp={positionDrag.isPositionDragging ? handlePositionDragEnd : undefined}
                         >
-                          {/* Corner indicators */}
-                          <div className={`absolute -top-1 -left-1 w-2 h-2 rounded-full ${
+                          {/* Grid Overlay (Rule of Thirds) */}
+                          {showGrid && (
+                            <>
+                              {/* Vertical lines */}
+                              <div className="absolute top-0 bottom-0 left-1/3 w-px bg-white/50"></div>
+                              <div className="absolute top-0 bottom-0 left-2/3 w-px bg-white/50"></div>
+                              {/* Horizontal lines */}
+                              <div className="absolute left-0 right-0 top-1/3 h-px bg-white/50"></div>
+                              <div className="absolute left-0 right-0 top-2/3 h-px bg-white/50"></div>
+                            </>
+                          )}
+
+                          {/* Corner handles - larger and more visible */}
+                          <div className={`absolute -top-2 -left-2 w-4 h-4 rounded-sm border-2 border-white ${
                             positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
-                          }`}></div>
-                          <div className={`absolute -top-1 -right-1 w-2 h-2 rounded-full ${
+                          } shadow-lg`}></div>
+                          <div className={`absolute -top-2 -right-2 w-4 h-4 rounded-sm border-2 border-white ${
                             positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
-                          }`}></div>
-                          <div className={`absolute -bottom-1 -left-1 w-2 h-2 rounded-full ${
+                          } shadow-lg`}></div>
+                          <div className={`absolute -bottom-2 -left-2 w-4 h-4 rounded-sm border-2 border-white ${
                             positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
-                          }`}></div>
-                          <div className={`absolute -bottom-1 -right-1 w-2 h-2 rounded-full ${
+                          } shadow-lg`}></div>
+                          <div className={`absolute -bottom-2 -right-2 w-4 h-4 rounded-sm border-2 border-white ${
                             positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
-                          }`}></div>
+                          } shadow-lg`}></div>
+
+                          {/* Edge handles - for resizing */}
+                          <div className={`absolute -top-1 left-1/2 -translate-x-1/2 w-8 h-2 rounded-sm ${
+                            positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
+                          } opacity-75`}></div>
+                          <div className={`absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-2 rounded-sm ${
+                            positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
+                          } opacity-75`}></div>
+                          <div className={`absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-8 rounded-sm ${
+                            positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
+                          } opacity-75`}></div>
+                          <div className={`absolute -right-1 top-1/2 -translate-y-1/2 w-2 h-8 rounded-sm ${
+                            positionDrag.isPositionDragging ? 'bg-blue-500' : 'bg-purple-500'
+                          } opacity-75`}></div>
+
+                          {/* Dimension display tooltip */}
+                          <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 dark:bg-slate-700 text-white text-xs px-3 py-1 rounded shadow-lg whitespace-nowrap pointer-events-none">
+                            {Math.round(displayWidth)} × {Math.round(displayHeight)} px
+                          </div>
 
                           {/* Position adjustment hint */}
                           {!positionDrag.isPositionDragging && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="bg-purple-600 text-white text-xs px-2 py-1 rounded opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
+                              <div className="bg-purple-600/90 dark:bg-purple-500/90 text-white text-xs px-3 py-1.5 rounded-lg opacity-0 hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
                                 ダブルクリックで移動
                               </div>
                             </div>
@@ -469,7 +606,7 @@ const CropControls: React.FC<CropControlsProps> = ({
                           {/* Position dragging indicator */}
                           {positionDrag.isPositionDragging && (
                             <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="bg-blue-600 text-white text-xs px-2 py-1 rounded pointer-events-none">
+                              <div className="bg-blue-600/90 dark:bg-blue-500/90 text-white text-xs px-3 py-1.5 rounded-lg pointer-events-none shadow-lg">
                                 位置調整中...
                               </div>
                             </div>
@@ -483,11 +620,24 @@ const CropControls: React.FC<CropControlsProps> = ({
 
               {/* Crop Information */}
               {hasCropData && (
-                <div className="mt-3 text-xs text-slate-600 dark:text-slate-400 space-y-1">
-                  <div>Position: ({Math.round(cropConfig.x)}, {Math.round(cropConfig.y)})</div>
-                  <div>Size: {Math.round(cropConfig.width)} × {Math.round(cropConfig.height)}px</div>
-                  <div className="text-purple-600 dark:text-purple-400">
-                    ヒント: 枠をダブルクリック＆ドラッグで位置調整
+                <div className="mt-3 bg-slate-50 dark:bg-slate-900/50 rounded-lg p-3 space-y-2">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-600 dark:text-slate-400">位置:</span>
+                    <span className="font-mono text-slate-700 dark:text-slate-300">
+                      X: {Math.round(cropConfig.x)}px, Y: {Math.round(cropConfig.y)}px
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-600 dark:text-slate-400">サイズ:</span>
+                    <span className="font-mono text-slate-700 dark:text-slate-300">
+                      {Math.round(cropConfig.width)} × {Math.round(cropConfig.height)}px
+                    </span>
+                  </div>
+                  <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                    <div className="text-xs text-purple-600 dark:text-purple-400 flex items-start gap-2">
+                      <Icon name="info" className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                      <span>枠をダブルクリック＆ドラッグで位置調整できます</span>
+                    </div>
                   </div>
                 </div>
               )}
