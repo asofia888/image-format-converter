@@ -234,8 +234,8 @@ const CropControls: React.FC<CropControlsProps> = ({
     };
   }, []);
 
-  // Handle double-click on crop frame to enable position adjustment
-  const handleCropDoubleClick = useCallback((e: React.MouseEvent) => {
+  // Handle single click on crop frame to enable position adjustment (changed from double-click)
+  const handleCropClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -531,10 +531,10 @@ const CropControls: React.FC<CropControlsProps> = ({
 
                       return (
                         <div
-                          className={`absolute border-3 transition-all duration-200 ${
+                          className={`group absolute border-3 transition-all duration-200 ${
                             positionDrag.isPositionDragging
                               ? 'border-blue-500 bg-blue-200/30 dark:bg-blue-400/30 cursor-move'
-                              : 'border-purple-500 bg-purple-200/20 dark:bg-purple-400/20 cursor-pointer'
+                              : 'border-purple-500 bg-purple-200/20 dark:bg-purple-400/20 cursor-move hover:bg-purple-300/30 dark:hover:bg-purple-500/30'
                           }`}
                           style={{
                             left: `${left}px`,
@@ -545,7 +545,7 @@ const CropControls: React.FC<CropControlsProps> = ({
                             borderWidth: '3px',
                             boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
                           }}
-                          onDoubleClick={handleCropDoubleClick}
+                          onMouseDown={handleCropClick}
                           onMouseMove={positionDrag.isPositionDragging ? handlePositionDrag : undefined}
                           onMouseUp={positionDrag.isPositionDragging ? handlePositionDragEnd : undefined}
                         >
@@ -596,9 +596,9 @@ const CropControls: React.FC<CropControlsProps> = ({
 
                           {/* Position adjustment hint */}
                           {!positionDrag.isPositionDragging && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="bg-purple-600/90 dark:bg-purple-500/90 text-white text-xs px-3 py-1.5 rounded-lg opacity-0 hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
-                                ダブルクリックで移動
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="bg-purple-600/90 dark:bg-purple-500/90 text-white text-xs px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                                クリック＆ドラッグで移動
                               </div>
                             </div>
                           )}
@@ -636,7 +636,7 @@ const CropControls: React.FC<CropControlsProps> = ({
                   <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
                     <div className="text-xs text-purple-600 dark:text-purple-400 flex items-start gap-2">
                       <Icon name="info" className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                      <span>枠をダブルクリック＆ドラッグで位置調整できます</span>
+                      <span>枠内をクリック＆ドラッグで好きな位置に移動できます</span>
                     </div>
                   </div>
                 </div>
