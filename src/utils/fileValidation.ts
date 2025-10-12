@@ -116,7 +116,7 @@ export const validateImageFile = async (file: File): Promise<FileValidationResul
   if (file.size > MAX_FILE_SIZE_BYTES) {
     return {
       isValid: false,
-      error: `File size exceeds ${MAX_FILE_SIZE_MB}MB limit`,
+      error: `This file is too large (maximum ${MAX_FILE_SIZE_MB}MB allowed)`,
     };
   }
 
@@ -124,7 +124,7 @@ export const validateImageFile = async (file: File): Promise<FileValidationResul
   if (!ALLOWED_IMAGE_TYPES.includes(file.type as any)) {
     return {
       isValid: false,
-      error: 'Invalid file type. Only JPEG, PNG, and WebP are allowed.',
+      error: 'This file type is not supported. Please use JPEG, PNG, or WebP images.',
     };
   }
 
@@ -132,7 +132,7 @@ export const validateImageFile = async (file: File): Promise<FileValidationResul
   if (!validateFileExtension(file.name)) {
     return {
       isValid: false,
-      error: 'Invalid file extension. Only .jpg, .jpeg, .png, and .webp are allowed.',
+      error: 'This file extension is not supported. Please use .jpg, .jpeg, .png, or .webp files.',
     };
   }
 
@@ -141,7 +141,7 @@ export const validateImageFile = async (file: File): Promise<FileValidationResul
   if (!hasValidSignature) {
     return {
       isValid: false,
-      error: 'File content does not match the declared type (potential security risk).',
+      error: 'This file appears to be damaged or is not a valid image file.',
     };
   }
 
