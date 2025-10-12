@@ -6,11 +6,11 @@
 
 ```
 default-src 'self';
-script-src 'self' 'sha256-/l7AUzKB6KJZktWRrqv1iSNi/vLFcBnwzGnrnfNJNsI=' 'sha256-i9iqcCtWFTH+9gHFg6EI4pASB11z22rOG/2Hvnn4tL0=' 'sha256-weH2QletrYWU8MgvVb02tdwNbth6cPTC34zUdCT/31I=' https://aistudiocdn.com;
+script-src 'self' 'sha256-/l7AUzKB6KJZktWRrqv1iSNi/vLFcBnwzGnrnfNJNsI=' 'sha256-i9iqcCtWFTH+9gHFg6EI4pASB11z22rOG/2Hvnn4tL0=' 'sha256-weH2QletrYWU8MgvVb02tdwNbth6cPTC34zUdCT/31I=' 'sha256-fM4bplb7wkd9OZMpoKKM9PKBsoN0CBq+Y5sZ6+5wF20=' 'sha256-2rOWYJZd8TDJrM/W1Uy634Jxqvo9gIyKZzxHuG79MBw=' https://aistudiocdn.com;
 style-src 'self' 'unsafe-inline';
 img-src 'self' data: blob:;
 font-src 'self' https://fonts.gstatic.com;
-connect-src 'self' https://aistudiocdn.com;
+connect-src 'self' blob: https://aistudiocdn.com;
 worker-src 'self' blob:;
 object-src 'none';
 base-uri 'self';
@@ -18,7 +18,7 @@ form-action 'self';
 upgrade-insecure-requests;
 ```
 
-**Note:** `frame-ancestors` は `<meta>` タグでは無視されるため、代わりに `X-Frame-Options: DENY` ヘッダーを使用しています。
+**Note:** `frame-ancestors` と `X-Frame-Options` は `<meta>` タグでは無視されるため、HTTPヘッダーで設定する必要があります。
 
 ## ディレクティブの説明
 
@@ -28,10 +28,12 @@ upgrade-insecure-requests;
 ### `script-src`
 スクリプトの読み込み元を制限：
 - `'self'`: 同一オリジン
-- `'sha256-...'`: インラインスクリプトのSHA-256ハッシュ（3つ）
+- `'sha256-...'`: インラインスクリプトのSHA-256ハッシュ（5つ）
   1. テーマ初期化スクリプト: `/l7AUzKB6KJZktWRrqv1iSNi/vLFcBnwzGnrnfNJNsI=`
   2. JSON-LD構造化データ: `i9iqcCtWFTH+9gHFg6EI4pASB11z22rOG/2Hvnn4tL0=`
   3. Import map: `weH2QletrYWU8MgvVb02tdwNbth6cPTC34zUdCT/31I=`
+  4. インラインスクリプト1: `fM4bplb7wkd9OZMpoKKM9PKBsoN0CBq+Y5sZ6+5wF20=`
+  5. インラインスクリプト2: `2rOWYJZd8TDJrM/W1Uy634Jxqvo9gIyKZzxHuG79MBw=`
 - `https://aistudiocdn.com`: AI Studio CDN
 
 ### `style-src`
@@ -53,6 +55,7 @@ upgrade-insecure-requests;
 ### `connect-src`
 XHR、WebSocket、EventSourceの接続先を制限：
 - `'self'`: 同一オリジン
+- `blob:`: Blob URL（画像変換プレビュー用）
 - `https://aistudiocdn.com`: AI Studio CDN
 
 ### `worker-src`
