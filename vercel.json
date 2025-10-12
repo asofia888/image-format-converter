@@ -34,7 +34,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://aistudiocdn.com; style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://aistudiocdn.com; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+          "value": "default-src 'self'; script-src 'self' 'sha256-/l7AUzKB6KJZktWRrqv1iSNi/vLFcBnwzGnrnfNJNsI=' 'sha256-i9iqcCtWFTH+9gHFg6EI4pASB11z22rOG/2Hvnn4tL0=' 'sha256-weH2QletrYWU8MgvVb02tdwNbth6cPTC34zUdCT/31I=' 'sha256-fM4bplb7wkd9OZMpoKKM9PKBsoN0CBq+Y5sZ6+5wF20=' 'sha256-2rOWYJZd8TDJrM/W1Uy634Jxqvo9gIyKZzxHuG79MBw=' https://aistudiocdn.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' blob: https://aistudiocdn.com; worker-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests;"
         }
       ]
     }
