@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { ProcessedFile, AppStatus } from '../types';
 import { type TranslationKeys } from './useTranslation';
 import { validateFiles, MAX_FILE_SIZE_MB } from '../utils/fileValidation';
@@ -10,13 +10,28 @@ export const useFileManager = () => {
   const [appStatus, setAppStatus] = useState<AppStatus>('idle');
   const { error, setError, handleError, clearError } = useErrorHandler();
 
+  // Track previous blob URLs to clean up only removed ones
+  const prevUrlsRef = useRef<Set<string>>(new Set());
+
   // Effect to clean up object URLs to prevent memory leaks
   useEffect(() => {
-    const objectUrls = files.flatMap(f => [f.originalSrc, f.croppedSrc, f.convertedSrc]).filter((url): url is string => !!(url && url.startsWith('blob:')));
+    const currentUrls = new Set(
+      files.flatMap(f => [f.originalSrc, f.croppedSrc, f.convertedSrc])
+        .filter((url): url is string => !!(url && url.startsWith('blob:')))
+    );
 
-    // Cleanup function runs when component unmounts or `files` state changes
+    // Revoke URLs that are no longer in use
+    prevUrlsRef.current.forEach(url => {
+      if (!currentUrls.has(url)) {
+        URL.revokeObjectURL(url);
+      }
+    });
+
+    prevUrlsRef.current = currentUrls;
+
+    // Cleanup function runs when component unmounts
     return () => {
-      objectUrls.forEach(url => URL.revokeObjectURL(url));
+      currentUrls.forEach(url => URL.revokeObjectURL(url));
     };
   }, [files]);
 
