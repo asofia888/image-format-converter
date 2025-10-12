@@ -86,8 +86,9 @@ export const validateFileSignature = async (file: File): Promise<boolean> => {
 export const sanitizeFileName = (fileName: string): string => {
   // Remove path separators and dangerous characters
   return fileName
+    .replace(/\0/g, '') // Remove null bytes
+    .replace(/\.\.[/\\]/g, '_') // Prevent directory traversal sequences like ../ or ..\
     .replace(/[/\\:*?"<>|]/g, '_') // Replace dangerous characters
-    .replace(/\.\./g, '_') // Prevent directory traversal
     .replace(/^\./, '_') // Prevent hidden files
     .substring(0, 255); // Limit length
 };
