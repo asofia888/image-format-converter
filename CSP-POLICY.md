@@ -6,18 +6,19 @@
 
 ```
 default-src 'self';
-script-src 'self' 'sha256-5F3l4lhJ3J60CyEPA8q4aBpPdUHE5EpKDQyI6EdatLo=' 'sha256-/l7AUzKB6KJZktWRrqv1iSNi/vLFcBnwzGnrnfNJNsI=' https://aistudiocdn.com https://cdn.tailwindcss.com;
-style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+script-src 'self' 'sha256-/l7AUzKB6KJZktWRrqv1iSNi/vLFcBnwzGnrnfNJNsI=' 'sha256-i9iqcCtWFTH+9gHFg6EI4pASB11z22rOG/2Hvnn4tL0=' 'sha256-weH2QletrYWU8MgvVb02tdwNbth6cPTC34zUdCT/31I=' https://aistudiocdn.com;
+style-src 'self' 'unsafe-inline';
 img-src 'self' data: blob:;
 font-src 'self' https://fonts.gstatic.com;
-connect-src 'self' https://aistudiocdn.com https://cdn.tailwindcss.com;
+connect-src 'self' https://aistudiocdn.com;
 worker-src 'self' blob:;
 object-src 'none';
 base-uri 'self';
 form-action 'self';
-frame-ancestors 'none';
 upgrade-insecure-requests;
 ```
+
+**Note:** `frame-ancestors` は `<meta>` タグでは無視されるため、代わりに `X-Frame-Options: DENY` ヘッダーを使用しています。
 
 ## ディレクティブの説明
 
@@ -27,17 +28,16 @@ upgrade-insecure-requests;
 ### `script-src`
 スクリプトの読み込み元を制限：
 - `'self'`: 同一オリジン
-- `'sha256-...'`: インラインスクリプトのSHA-256ハッシュ（2つ）
-  1. Tailwind設定スクリプト
-  2. テーマ初期化スクリプト
+- `'sha256-...'`: インラインスクリプトのSHA-256ハッシュ（3つ）
+  1. テーマ初期化スクリプト: `/l7AUzKB6KJZktWRrqv1iSNi/vLFcBnwzGnrnfNJNsI=`
+  2. JSON-LD構造化データ: `i9iqcCtWFTH+9gHFg6EI4pASB11z22rOG/2Hvnn4tL0=`
+  3. Import map: `weH2QletrYWU8MgvVb02tdwNbth6cPTC34zUdCT/31I=`
 - `https://aistudiocdn.com`: AI Studio CDN
-- `https://cdn.tailwindcss.com`: Tailwind CSS CDN
 
 ### `style-src`
 スタイルシートの読み込み元を制限：
 - `'self'`: 同一オリジン
-- `'unsafe-inline'`: インラインスタイル（Tailwind CDNに必要）
-- `https://cdn.tailwindcss.com`: Tailwind CSS CDN
+- `'unsafe-inline'`: インラインスタイル（一部コンポーネントで必要）
 
 ### `img-src`
 画像の読み込み元を制限：
@@ -54,7 +54,6 @@ upgrade-insecure-requests;
 XHR、WebSocket、EventSourceの接続先を制限：
 - `'self'`: 同一オリジン
 - `https://aistudiocdn.com`: AI Studio CDN
-- `https://cdn.tailwindcss.com`: Tailwind CSS CDN
 
 ### `worker-src`
 Web Workersの読み込み元を制限：
@@ -82,35 +81,7 @@ HTTPリクエストを自動的にHTTPSにアップグレード
 
 インラインスクリプトを変更した場合、新しいSHA-256ハッシュを計算する必要があります。
 
-### スクリプト1: Tailwind設定（index.html:86-102）
-
-```bash
-# スクリプトの内容を抽出
-cat > /tmp/script.js << 'EOF'
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              'brand-primary': '#007BFF',
-              'brand-secondary': '#6C757D',
-              'brand-success': '#28A745',
-              'brand-danger': '#DC3545',
-              'brand-light': '#F8F9FA',
-              'brand-dark': '#343A40',
-            },
-          },
-        },
-      }
-EOF
-
-# SHA-256ハッシュを計算
-echo -n "$(cat /tmp/script.js)" | openssl dgst -sha256 -binary | openssl base64
-```
-
-現在のハッシュ: `5F3l4lhJ3J60CyEPA8q4aBpPdUHE5EpKDQyI6EdatLo=`
-
-### スクリプト2: テーマ初期化（index.html:144-156）
+### スクリプト1: テーマ初期化（index.html:129-141）
 
 ```bash
 # スクリプトの内容を抽出
@@ -145,9 +116,8 @@ echo -n "$(cat /tmp/script.js)" | openssl dgst -sha256 -binary | openssl base64
 - Web Worker用のblob:許可
 
 ### ⚠️ 今後の改善点
-- `style-src`の`'unsafe-inline'`削除（Tailwind CSS v4のビルトインCSSに移行後）
+- `style-src`の`'unsafe-inline'`削除（全てのインラインスタイルをCSS化）
 - Nonce使用への移行（動的CSP生成）
-- Tailwind CDN削除（ビルド時にCSSを生成）
 
 ---
 

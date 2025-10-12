@@ -1,6 +1,16 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@variant dark (&:is(.dark *));
+
+@theme {
+  /* Custom colors */
+  --color-brand-primary: #007BFF;
+  --color-brand-secondary: #6C757D;
+  --color-brand-success: #28A745;
+  --color-brand-danger: #DC3545;
+  --color-brand-light: #F8F9FA;
+  --color-brand-dark: #343A40;
+}
 
 /* CSS Reset for proper layout */
 * {

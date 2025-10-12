@@ -13,18 +13,18 @@
     <!-- Security Headers -->
     <meta http-equiv="Content-Security-Policy" content="
       default-src 'self';
-      script-src 'self' 'sha256-5F3l4lhJ3J60CyEPA8q4aBpPdUHE5EpKDQyI6EdatLo=' 'sha256-/l7AUzKB6KJZktWRrqv1iSNi/vLFcBnwzGnrnfNJNsI=' https://aistudiocdn.com https://cdn.tailwindcss.com;
-      style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com;
+      script-src 'self' 'sha256-/l7AUzKB6KJZktWRrqv1iSNi/vLFcBnwzGnrnfNJNsI=' 'sha256-i9iqcCtWFTH+9gHFg6EI4pASB11z22rOG/2Hvnn4tL0=' 'sha256-weH2QletrYWU8MgvVb02tdwNbth6cPTC34zUdCT/31I=' https://aistudiocdn.com;
+      style-src 'self' 'unsafe-inline';
       img-src 'self' data: blob:;
       font-src 'self' https://fonts.gstatic.com;
-      connect-src 'self' https://aistudiocdn.com https://cdn.tailwindcss.com;
+      connect-src 'self' https://aistudiocdn.com;
       worker-src 'self' blob:;
       object-src 'none';
       base-uri 'self';
       form-action 'self';
-      frame-ancestors 'none';
       upgrade-insecure-requests;
     ">
+    <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
@@ -49,7 +49,6 @@
     <link rel="canonical" href="https://image-format-converter-eight.vercel.app/" />
 
     <!-- Preconnect to improve performance -->
-    <link rel="preconnect" href="https://cdn.tailwindcss.com" />
     <link rel="preconnect" href="https://aistudiocdn.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
 
@@ -84,25 +83,6 @@
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
     <link rel="mask-icon" href="/logo.png" color="#8b5cf6" />
 
-    <!-- Structured Data (JSON-LD) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              'brand-primary': '#007BFF',
-              'brand-secondary': '#6C757D',
-              'brand-success': '#28A745',
-              'brand-danger': '#DC3545',
-              'brand-light': '#F8F9FA',
-              'brand-dark': '#343A40',
-            },
-          },
-        },
-      }
-    </script>
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
     {
