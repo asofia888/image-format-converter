@@ -20,8 +20,7 @@ export const useFileManager = () => {
         .filter((url): url is string => !!(url && url.startsWith('blob:')))
     );
 
-    // Revoke URLs that are no longer in use, but with a small delay
-    // to ensure React has finished rendering with the new state
+    // Identify URLs that are no longer in use
     const urlsToRevoke: string[] = [];
     prevUrlsRef.current.forEach(url => {
       if (!currentUrls.has(url)) {
@@ -29,25 +28,49 @@ export const useFileManager = () => {
       }
     });
 
-    // Delay revocation to next tick to avoid race conditions with React rendering
-    if (urlsToRevoke.length > 0) {
-      const timeoutId = setTimeout(() => {
-        urlsToRevoke.forEach(url => URL.revokeObjectURL(url));
-      }, 0);
+    // Update the reference immediately
+    prevUrlsRef.current = currentUrls;
 
-      prevUrlsRef.current = currentUrls;
+    // Delay revocation to ensure all React rendering and browser painting is complete
+    // Using requestAnimationFrame + setTimeout ensures we're past the paint cycle
+    if (urlsToRevoke.length > 0) {
+      let rafId: number | undefined;
+      let timeoutId: number | undefined;
+
+      rafId = requestAnimationFrame(() => {
+        timeoutId = window.setTimeout(() => {
+          urlsToRevoke.forEach(url => {
+            try {
+              URL.revokeObjectURL(url);
+            } catch (e) {
+              // URL already revoked or invalid, ignore
+            }
+          });
+        }, 100); // Additional delay to ensure complete rendering
+      });
 
       return () => {
-        clearTimeout(timeoutId);
-        currentUrls.forEach(url => URL.revokeObjectURL(url));
+        if (rafId !== undefined) cancelAnimationFrame(rafId);
+        if (timeoutId !== undefined) clearTimeout(timeoutId);
+        currentUrls.forEach(url => {
+          try {
+            URL.revokeObjectURL(url);
+          } catch (e) {
+            // URL already revoked or invalid, ignore
+          }
+        });
       };
     }
 
-    prevUrlsRef.current = currentUrls;
-
     // Cleanup function runs when component unmounts
     return () => {
-      currentUrls.forEach(url => URL.revokeObjectURL(url));
+      currentUrls.forEach(url => {
+        try {
+          URL.revokeObjectURL(url);
+        } catch (e) {
+          // URL already revoked or invalid, ignore
+        }
+      });
     };
   }, [files]);
 
