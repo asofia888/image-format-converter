@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import type { CropConfig } from '../types';
 import Icon from './Icon';
 import { useTranslation } from '../hooks/useTranslation';
@@ -58,6 +58,19 @@ const CropControls: React.FC<CropControlsProps> = ({
   const [showGrid, setShowGrid] = useState(true);
 
   const hasCropData = cropConfig.width > 0 && cropConfig.height > 0;
+
+  // Memoize aspect ratio display text
+  const aspectRatioText = useMemo(() => {
+    if (!cropConfig.constrainAspectRatio || !cropConfig.aspectRatio) return null;
+
+    if (cropConfig.aspectRatio === 1.0) return '1:1 (正方形)';
+    if (Math.abs(cropConfig.aspectRatio - 16/9) < 0.01) return '16:9 (ワイド)';
+    if (Math.abs(cropConfig.aspectRatio - 4/3) < 0.01) return '4:3 (標準)';
+
+    return cropConfig.aspectRatio > 1
+      ? `${cropConfig.aspectRatio.toFixed(2)}:1`
+      : `1:${(1/cropConfig.aspectRatio).toFixed(2)}`;
+  }, [cropConfig.constrainAspectRatio, cropConfig.aspectRatio]);
 
   const handleToggleCrop = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const enabled = e.target.checked;
@@ -466,13 +479,9 @@ const CropControls: React.FC<CropControlsProps> = ({
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                     {t('cropInstructionLabel')}
                   </span>
-                  {cropConfig.constrainAspectRatio && cropConfig.aspectRatio && (
+                  {aspectRatioText && (
                     <div className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                      アスペクト比: {cropConfig.aspectRatio === 1.0 ? '1:1 (正方形)' :
-                        Math.abs(cropConfig.aspectRatio - 16/9) < 0.01 ? '16:9 (ワイド)' :
-                        Math.abs(cropConfig.aspectRatio - 4/3) < 0.01 ? '4:3 (標準)' :
-                        cropConfig.aspectRatio > 1 ? `${cropConfig.aspectRatio.toFixed(2)}:1` :
-                        `1:${(1/cropConfig.aspectRatio).toFixed(2)}`}
+                      アスペクト比: {aspectRatioText}
                     </div>
                   )}
                 </div>
@@ -506,30 +515,28 @@ const CropControls: React.FC<CropControlsProps> = ({
                 />
 
                 {/* Crop Selection Overlay */}
-                {cropConfig.enabled && imageLoaded && imageRef.current && (hasCropData || selection.isDragging) && (
-                  <>
-                    {(() => {
-                      const imageRect = imageRef.current?.getBoundingClientRect();
-                      const containerRect = containerRef.current?.getBoundingClientRect();
+                {cropConfig.enabled && imageLoaded && imageRef.current && (hasCropData || selection.isDragging) && (() => {
+                  const imageRect = imageRef.current?.getBoundingClientRect();
+                  const containerRect = containerRef.current?.getBoundingClientRect();
 
-                      if (!imageRect || !containerRect) return null;
+                  if (!imageRect || !containerRect) return null;
 
-                      // Use crop config if available, otherwise use current selection
-                      const displayX = hasCropData ? cropConfig.x : Math.min(selection.startX, selection.endX);
-                      const displayY = hasCropData ? cropConfig.y : Math.min(selection.startY, selection.endY);
-                      const displayWidth = hasCropData ? cropConfig.width : Math.abs(selection.endX - selection.startX);
-                      const displayHeight = hasCropData ? cropConfig.height : Math.abs(selection.endY - selection.startY);
+                  // Use crop config if available, otherwise use current selection
+                  const displayX = hasCropData ? cropConfig.x : Math.min(selection.startX, selection.endX);
+                  const displayY = hasCropData ? cropConfig.y : Math.min(selection.startY, selection.endY);
+                  const displayWidth = hasCropData ? cropConfig.width : Math.abs(selection.endX - selection.startX);
+                  const displayHeight = hasCropData ? cropConfig.height : Math.abs(selection.endY - selection.startY);
 
-                      // Convert image coordinates to display coordinates
-                      const scaleX = imageRect.width / imageRef.current.naturalWidth;
-                      const scaleY = imageRect.height / imageRef.current.naturalHeight;
+                  // Convert image coordinates to display coordinates
+                  const scaleX = imageRect.width / imageRef.current.naturalWidth;
+                  const scaleY = imageRect.height / imageRef.current.naturalHeight;
 
-                      const left = displayX * scaleX;
-                      const top = displayY * scaleY;
-                      const width = displayWidth * scaleX;
-                      const height = displayHeight * scaleY;
+                  const left = displayX * scaleX;
+                  const top = displayY * scaleY;
+                  const width = displayWidth * scaleX;
+                  const height = displayHeight * scaleY;
 
-                      return (
+                  return (
                         <div
                           className={`group absolute border-3 transition-all duration-200 ${
                             positionDrag.isPositionDragging
@@ -613,9 +620,7 @@ const CropControls: React.FC<CropControlsProps> = ({
                           )}
                         </div>
                       );
-                    })()}
-                  </>
-                )}
+                })()}
               </div>
 
               {/* Crop Information */}

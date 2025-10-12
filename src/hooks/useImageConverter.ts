@@ -87,11 +87,23 @@ export const useImageConverter = () => {
   const prevSettingsRef = useRef({ targetFormat, quality, resizeConfig, cropConfig });
   useEffect(() => {
     const prev = prevSettingsRef.current;
-    const hasSettingsChanged =
-      prev.targetFormat !== targetFormat ||
-      prev.quality !== quality ||
-      JSON.stringify(prev.resizeConfig) !== JSON.stringify(resizeConfig) ||
-      JSON.stringify(prev.cropConfig) !== JSON.stringify(cropConfig);
+
+    // Shallow compare for better performance
+    const hasFormatChanged = prev.targetFormat !== targetFormat;
+    const hasQualityChanged = prev.quality !== quality;
+    const hasResizeChanged =
+      prev.resizeConfig.enabled !== resizeConfig.enabled ||
+      prev.resizeConfig.width !== resizeConfig.width ||
+      prev.resizeConfig.height !== resizeConfig.height ||
+      prev.resizeConfig.unit !== resizeConfig.unit;
+    const hasCropChanged =
+      prev.cropConfig.enabled !== cropConfig.enabled ||
+      prev.cropConfig.x !== cropConfig.x ||
+      prev.cropConfig.y !== cropConfig.y ||
+      prev.cropConfig.width !== cropConfig.width ||
+      prev.cropConfig.height !== cropConfig.height;
+
+    const hasSettingsChanged = hasFormatChanged || hasQualityChanged || hasResizeChanged || hasCropChanged;
 
     if (hasSettingsChanged && files.length > 0 && files.some(f => f.status === 'success')) {
       resetConversionState();
