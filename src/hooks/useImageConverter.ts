@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useTranslation } from './useTranslation';
 import { useFileManager } from './useFileManager';
 import { usePresetManager } from './usePresetManager';
@@ -24,6 +24,7 @@ export const useImageConverter = () => {
     updateFileConversion,
     handleFileNameChange,
     handleRemoveFile,
+    resetConversionState,
     resetState: resetFileState
   } = useFileManager();
 
@@ -81,6 +82,23 @@ export const useImageConverter = () => {
 
 
   const isBatchMode = useMemo(() => files.length > 1, [files]);
+
+  // Track when settings change to reset conversion state
+  const prevSettingsRef = useRef({ targetFormat, quality, resizeConfig, cropConfig });
+  useEffect(() => {
+    const prev = prevSettingsRef.current;
+    const hasSettingsChanged =
+      prev.targetFormat !== targetFormat ||
+      prev.quality !== quality ||
+      JSON.stringify(prev.resizeConfig) !== JSON.stringify(resizeConfig) ||
+      JSON.stringify(prev.cropConfig) !== JSON.stringify(cropConfig);
+
+    if (hasSettingsChanged && files.length > 0 && files.some(f => f.status === 'success')) {
+      resetConversionState();
+    }
+
+    prevSettingsRef.current = { targetFormat, quality, resizeConfig, cropConfig };
+  }, [targetFormat, quality, resizeConfig, cropConfig, files, resetConversionState]);
 
   const resetState = useCallback(() => {
     resetFileState();
@@ -154,6 +172,7 @@ export const useImageConverter = () => {
     setQuality,
     handleConvert,
     resetState,
+    resetConversionState,
     handleDownloadZip,
     handleDownloadSingle,
     getConvertedFileName,

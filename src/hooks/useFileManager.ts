@@ -211,6 +211,21 @@ export const useFileManager = () => {
     });
   }, []);
 
+  const resetConversionState = useCallback(() => {
+    setFiles(prevFiles =>
+      prevFiles.map(file => ({
+        ...file,
+        status: 'pending' as const,
+        convertedSrc: null,
+        convertedBlob: null,
+        convertedSize: null,
+        error: null
+      }))
+    );
+    setAppStatus('idle');
+    clearError();
+  }, [clearError]);
+
   const resetState = useCallback(() => {
     setFiles([]);
     setAppStatus('idle');
@@ -229,6 +244,7 @@ export const useFileManager = () => {
     updateFileConversion,
     handleFileNameChange,
     handleRemoveFile,
+    resetConversionState,
     resetState,
   };
 };
