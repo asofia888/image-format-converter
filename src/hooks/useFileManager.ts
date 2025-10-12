@@ -20,12 +20,28 @@ export const useFileManager = () => {
         .filter((url): url is string => !!(url && url.startsWith('blob:')))
     );
 
-    // Revoke URLs that are no longer in use
+    // Revoke URLs that are no longer in use, but with a small delay
+    // to ensure React has finished rendering with the new state
+    const urlsToRevoke: string[] = [];
     prevUrlsRef.current.forEach(url => {
       if (!currentUrls.has(url)) {
-        URL.revokeObjectURL(url);
+        urlsToRevoke.push(url);
       }
     });
+
+    // Delay revocation to next tick to avoid race conditions with React rendering
+    if (urlsToRevoke.length > 0) {
+      const timeoutId = setTimeout(() => {
+        urlsToRevoke.forEach(url => URL.revokeObjectURL(url));
+      }, 0);
+
+      prevUrlsRef.current = currentUrls;
+
+      return () => {
+        clearTimeout(timeoutId);
+        currentUrls.forEach(url => URL.revokeObjectURL(url));
+      };
+    }
 
     prevUrlsRef.current = currentUrls;
 
