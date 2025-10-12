@@ -83,7 +83,17 @@ const en = {
   "presetDeleteSuccess": "Preset '{presetName}' deleted.",
   "errorPresetNameExists": "A preset with this name already exists.",
   "errorPresetNameEmpty": "Preset name cannot be empty.",
-  "presetDuplicateError": "A preset with the same settings already exists."
+  "presetDuplicateError": "A preset with the same settings already exists.",
+  "undoButton": "Undo",
+  "redoButton": "Redo",
+  "undoTooltip": "Undo (Ctrl+Z)",
+  "redoTooltip": "Redo (Ctrl+Y)",
+  "keyboardShortcutsTitle": "Keyboard Shortcuts",
+  "shortcutUndo": "Undo",
+  "shortcutRedo": "Redo",
+  "shortcutSave": "Download",
+  "shortcutOpen": "Open file",
+  "shortcutClear": "Clear all"
 };
 
 const ja = {
@@ -167,7 +177,17 @@ const ja = {
   "presetDeleteSuccess": "プリセット「{presetName}」を削除しました。",
   "errorPresetNameExists": "この名前のプリセットは既に存在します。",
   "errorPresetNameEmpty": "プリセット名は空にできません。",
-  "presetDuplicateError": "同じ設定のプリセットが既に存在します。"
+  "presetDuplicateError": "同じ設定のプリセットが既に存在します。",
+  "undoButton": "元に戻す",
+  "redoButton": "やり直す",
+  "undoTooltip": "元に戻す (Ctrl+Z)",
+  "redoTooltip": "やり直す (Ctrl+Y)",
+  "keyboardShortcutsTitle": "キーボードショートカット",
+  "shortcutUndo": "元に戻す",
+  "shortcutRedo": "やり直す",
+  "shortcutSave": "ダウンロード",
+  "shortcutOpen": "ファイルを開く",
+  "shortcutClear": "すべてクリア"
 };
 
 const translations = { en, ja };
