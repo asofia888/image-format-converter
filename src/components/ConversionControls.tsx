@@ -18,8 +18,7 @@ interface ConversionControlsProps {
   isDownloadReady: boolean;
   isBatchMode: boolean;
   onDownloadZip: () => void;
-  convertedImageSrc: string | null;
-  convertedFileName: string;
+  onDownloadSingle: () => void;
   originalImageSrc: string | null;
   resizeConfig: ResizeConfig;
   setResizeConfig: React.Dispatch<React.SetStateAction<ResizeConfig>>;
@@ -46,8 +45,7 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
   isDownloadReady,
   isBatchMode,
   onDownloadZip,
-  convertedImageSrc,
-  convertedFileName,
+  onDownloadSingle,
   originalImageSrc,
   resizeConfig,
   setResizeConfig,
@@ -61,7 +59,7 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
   onApplyPreset,
   onDeletePreset,
 }) => {
-  const hasBeenConverted = useMemo(() => convertedImageSrc !== null || isDownloadReady, [convertedImageSrc, isDownloadReady]);
+  const hasBeenConverted = useMemo(() => isDownloadReady, [isDownloadReady]);
 
   return (
     <div className="space-y-6">
@@ -109,8 +107,7 @@ const ConversionControls: React.FC<ConversionControlsProps> = ({
         hasBeenConverted={hasBeenConverted}
         isBatchMode={isBatchMode}
         onDownloadZip={onDownloadZip}
-        convertedImageSrc={convertedImageSrc}
-        convertedFileName={convertedFileName}
+        onDownloadSingle={onDownloadSingle}
       />
     </div>
   );

@@ -9,8 +9,7 @@ interface ActionButtonsProps {
   hasBeenConverted: boolean;
   isBatchMode: boolean;
   onDownloadZip: () => void;
-  convertedImageSrc: string | null;
-  convertedFileName: string;
+  onDownloadSingle: () => void;
   onUndo?: () => void;
   onRedo?: () => void;
   canUndo?: boolean;
@@ -24,8 +23,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
   hasBeenConverted,
   isBatchMode,
   onDownloadZip,
-  convertedImageSrc,
-  convertedFileName,
+  onDownloadSingle,
   onUndo,
   onRedo,
   canUndo = false,
@@ -85,14 +83,13 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({
           {t('downloadAllButton')}
         </button>
       ) : (
-        <a
-          href={convertedImageSrc || ''}
-          download={convertedFileName}
+        <button
+          onClick={onDownloadSingle}
           className="inline-flex items-center justify-center px-6 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-50 dark:focus:ring-offset-slate-800 focus:ring-green-500"
         >
           <Icon name="download" className="w-5 h-5 mr-2"/>
           {t('downloadButton')}
-        </a>
+        </button>
       )}
     </div>
   );

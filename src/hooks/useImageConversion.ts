@@ -134,6 +134,47 @@ export const useImageConversion = ({
     return `${baseName}.${targetFormat}`;
   }, [targetFormat]);
 
+  const handleDownloadSingle = useCallback(async () => {
+    const file = files[0];
+    if (!file || file.status !== 'success' || !file.convertedBlob) {
+      return;
+    }
+
+    const fileName = getConvertedFileName(file.file, file.customName);
+    const mimeType = `image/${targetFormat}`;
+
+    // Check if File System Access API is supported
+    if ('showSaveFilePicker' in window) {
+      try {
+        const fileHandle = await (window as any).showSaveFilePicker({
+          suggestedName: fileName,
+          types: [{
+            description: 'Image files',
+            accept: { [mimeType]: [`.${targetFormat}`] }
+          }]
+        });
+
+        const writable = await fileHandle.createWritable();
+        await writable.write(file.convertedBlob);
+        await writable.close();
+        return;
+      } catch (e) {
+        // User cancelled or API failed, fall back to traditional download
+        if ((e as Error).name !== 'AbortError') {
+          console.warn('File System Access API failed:', e);
+        }
+      }
+    }
+
+    // Fallback to traditional download
+    const link = document.createElement('a');
+    link.href = file.convertedSrc!;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }, [files, getConvertedFileName, targetFormat]);
+
   const handleDownloadZip = useCallback(async () => {
     try {
         // Dynamically import JSZip only when needed
@@ -191,6 +232,7 @@ export const useImageConversion = ({
     convertedCount,
     handleConvert,
     getConvertedFileName,
-    handleDownloadZip
+    handleDownloadZip,
+    handleDownloadSingle
   };
 };

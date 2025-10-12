@@ -63,7 +63,8 @@ export const useImageConverter = () => {
     convertedCount,
     handleConvert,
     getConvertedFileName,
-    handleDownloadZip
+    handleDownloadZip,
+    handleDownloadSingle
   } = useImageConversion({
     files,
     targetFormat,
@@ -154,6 +155,7 @@ export const useImageConverter = () => {
     handleConvert,
     resetState,
     handleDownloadZip,
+    handleDownloadSingle,
     getConvertedFileName,
     handleSavePreset,
     handleApplyPreset,

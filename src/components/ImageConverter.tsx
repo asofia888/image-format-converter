@@ -36,6 +36,7 @@ const ImageConverter: React.FC = () => {
     handleConvert,
     resetState,
     handleDownloadZip,
+    handleDownloadSingle,
     getConvertedFileName,
     handleSavePreset,
     handleApplyPreset,
@@ -175,8 +176,7 @@ const ImageConverter: React.FC = () => {
                 isDownloadReady={isDownloadReady}
                 isBatchMode={isBatchMode}
                 onDownloadZip={handleDownloadZip}
-                convertedImageSrc={!isBatchMode && files[0] ? files[0].convertedSrc : null}
-                convertedFileName={!isBatchMode && files[0] ? getConvertedFileName(files[0].file, files[0].customName) : ''}
+                onDownloadSingle={handleDownloadSingle}
                 originalImageSrc={!isBatchMode && files[0] ? files[0].originalSrc : null}
                 resizeConfig={resizeConfig}
                 setResizeConfig={setResizeConfig}
