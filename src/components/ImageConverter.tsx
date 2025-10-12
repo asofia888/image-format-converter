@@ -6,8 +6,10 @@ import ConversionControls from './ConversionControls';
 import EditableFileName from './EditableFileName';
 import Icon from './Icon';
 import ProgressBar from './ui/ProgressBar';
+import KeyboardShortcutsHint from './KeyboardShortcutsHint';
 import { useTranslation } from '../hooks/useTranslation';
 import { useImageConverter } from '../hooks/useImageConverter';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { formatBytes } from '../utils/formatBytes';
 import { calculateCompressionRatio } from '../utils/percentage';
 
@@ -45,6 +47,12 @@ const ImageConverter: React.FC = () => {
     handleRemoveFile,
     handleApplyCrop,
   } = useImageConverter();
+
+  // Keyboard shortcuts for quick actions
+  useKeyboardShortcuts({
+    onSave: isDownloadReady ? (isBatchMode ? handleDownloadZip : handleDownloadSingle) : undefined,
+    onClear: files.length > 0 ? resetState : undefined,
+  });
 
   const statusIconMap = useMemo(() => ({
     pending: { text: t('fileStatusPending'), icon: 'pending', class: 'text-slate-400 dark:text-slate-500' },
@@ -96,10 +104,16 @@ const ImageConverter: React.FC = () => {
           {isBatchMode && (
             <div>
               {isConverting && (
-                <div className="mb-4">
-                  <div id="progress-label" className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                      {t('progressText', { convertedCount: convertedCount, totalFiles: files.length })}
+                <div className="mb-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4 border border-purple-200 dark:border-purple-800">
+                  <div id="progress-label" className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <Icon name="spinner" className="w-4 h-4 animate-spin text-purple-600 dark:text-purple-400" />
+                      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                        {t('progressText', { convertedCount: convertedCount, totalFiles: files.length })}
+                      </span>
+                    </div>
+                    <span className="text-xs text-slate-600 dark:text-slate-400">
+                      {Math.round((convertedCount / files.length) * 100)}%
                     </span>
                   </div>
                   <ProgressBar
@@ -108,6 +122,9 @@ const ImageConverter: React.FC = () => {
                     size="md"
                     color="purple"
                   />
+                  <div className="mt-2 text-xs text-slate-600 dark:text-slate-400 text-center">
+                    {convertedCount < files.length ? '変換中...' : '完了！'}
+                  </div>
                 </div>
               )}
               <div className="max-h-80 overflow-y-auto pr-2">
@@ -199,6 +216,9 @@ const ImageConverter: React.FC = () => {
            )}
         </div>
       )}
+
+      {/* Keyboard Shortcuts Hint - always show */}
+      <KeyboardShortcutsHint />
     </div>
   );
 };
