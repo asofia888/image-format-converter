@@ -16,7 +16,7 @@ const KeyboardShortcutsHint: React.FC = () => {
   const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 left-4 z-50">
       {/* Hint Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -37,7 +37,7 @@ const KeyboardShortcutsHint: React.FC = () => {
           />
 
           {/* Popup Content */}
-          <div className="absolute bottom-16 right-0 bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 p-4 w-80">
+          <div className="absolute bottom-16 left-0 bg-white dark:bg-slate-800 rounded-lg shadow-2xl border border-slate-200 dark:border-slate-700 p-4 w-80">
             <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-200 dark:border-slate-700">
               <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-200">
                 キーボードショートカット
